@@ -1,0 +1,25 @@
+{
+  "watch": [
+    "app.js",
+    "routes/",
+    "models/",
+    "middleware/",
+    "config/"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "node_modules/",
+    "logs/",
+    "*.log",
+    "public/",
+    "uploads/"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "exec": "node app.js",
+  "restartable": "rs",
+  "verbose": true,
+  "colours": true,
+  "delay": 1000
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} - Server Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #dc3545;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .alert-danger {
+            background: #dc3545;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{title}}</h1>
+
+        {{#if error}}
+            <div class="alert alert-danger">{{error}}</div>
+        {{/if}}
+
+        <form action="/server/{{#if server._id}}edit/{{server._id}}{{else}}add{{/if}}" method="POST">
+            <div class="form-group">
+                <label for="model">Server Model</label>
+                <input type="text" id="model" name="model" value="{{server.model}}" required>
+            </div>
+            <div class="form-group">
+                <label for="serverNumber">Server Number</label>
+                <input type="text" id="serverNumber" name="serverNumber" value="{{server.serverNumber}}" required>
+            </div>
+            <div class="form-group">
+                <label for="os">Operating System</label>
+                <input type="text" id="os" name="os" value="{{server.os}}" required>
+            </div>
+            <div class="form-group">
+                <label for="ram">RAM</label>
+                <input type="text" id="ram" name="ram" value="{{server.ram}}" required>
+            </div>
+            <div class="form-group">
+                <label for="storage">Storage</label>
+                <input type="text" id="storage" name="storage" value="{{server.storage}}" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{server.username}}" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" value="{{server.password}}" required>
+                    <i class="fas fa-eye-slash toggle-password"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="serverIp">Server IP</label>
+                <input type="text" id="serverIp" name="serverIp" value="{{server.serverIp}}" required>
+            </div>
+            <div class="form-group">
+                <label for="allocatedDomain">Allocated Domain</label>
+                <input type="text" id="allocatedDomain" name="allocatedDomain" value="{{server.allocatedDomain}}" required>
+            </div>
+            <div class="form-group">
+                <label for="team">Team</label>
+                <input type="text" id="team" name="team" value="{{server.team}}" required>
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="on" {{#if (eq server.status 'on')}}selected{{/if}}>On</option>
+                    <option value="off" {{#if (eq server.status 'off')}}selected{{/if}}>Off</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">{{title}}</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordWrappers = document.querySelectorAll('.password-wrapper');
+
+            passwordWrappers.forEach(wrapper => {
+                const passwordInput = wrapper.querySelector('input');
+                const togglePassword = wrapper.querySelector('.toggle-password');
+
+                if (passwordInput && togglePassword) {
+                    togglePassword.addEventListener('click', function () {
+                        // toggle the type attribute
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+                        // toggle the eye icon
+                        this.classList.toggle('fa-eye');
+                        this.classList.toggle('fa-eye-slash');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
