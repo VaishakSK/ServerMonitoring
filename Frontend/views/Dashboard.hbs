@@ -439,6 +439,80 @@
             font-size: 0.9rem;
         }
 
+        /* Toast / popup (top-right) */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            max-width: 420px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(17,24,39,0.9), rgba(31,41,55,0.85));
+            box-shadow: 0 10px 30px rgba(2,6,23,0.45), 0 2px 6px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.04);
+            transform: translateX(18px) scale(.98);
+            opacity: 0;
+            animation: toast-in .36s cubic-bezier(.2,.9,.3,1) forwards;
+            overflow: hidden;
+            backdrop-filter: blur(6px);
+        }
+
+        .toast .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            flex: 0 0 40px;
+            font-size: 1.1rem;
+        }
+
+        .toast .message {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.2;
+        }
+
+        .toast.success { border-left: 4px solid #28a745; }
+        .toast.info    { border-left: 4px solid #0d6efd; }
+        .toast.warn    { border-left: 4px solid #ffc107; }
+
+        .toast .close {
+            margin-left: 8px;
+            cursor: pointer;
+            opacity: 0.8;
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        @keyframes toast-in {
+            from { transform: translateX(18px) scale(.98); opacity: 0; }
+            to   { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes toast-out {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to   { transform: translateX(18px) scale(.98); opacity: 0; }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .header-content h1 {
@@ -594,7 +668,6 @@
                 <div class="server-card">
                     <div class="server-header">
                         <div class="server-name">{{this.model}}</div>
-                        <div class="server-status {{#if (eq this.status 'off')}}offline{{/if}}"></div>
                     </div>
                     <div class="server-info">
                         <div class="info-item">
@@ -615,7 +688,8 @@
                         </div>
                     </div>
                     <div class="server-actions">
-                        <a href="#" onclick="promptForCodeAndRedirect('/server/edit/{{this._id}}')" class="action-btn btn-success">Manage</a>
+                        <a href="#" class="action-btn btn-primary" data-action="monitor">Monitor</a>
+                        <a href="#" class="action-btn btn-success" data-action="manage" data-url="/server/edit/{{this._id}}">Manage</a>
                         <form action="/server/delete/{{this._id}}" method="POST" onsubmit="return handleDelete(this);">
                             <button type="submit" class="action-btn btn-danger">Delete</button>
                         </form>
@@ -684,16 +758,86 @@
             });
         });
 
-        // Action button functionality
+        // Toast helper
+        function ensureToastContainer() {
+            let c = document.querySelector('.toast-container');
+            if (!c) {
+                c = document.createElement('div');
+                c.className = 'toast-container';
+                document.body.appendChild(c);
+            }
+            return c;
+        }
+
+        function showToast(message, type = 'info', timeout = 2000) {
+            const container = ensureToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="icon">${type === 'success' ? '<i class="fas fa-check-circle"></i>' : (type === 'warn' ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>')}</div>
+                <div class="message">${message}</div>
+                <div class="close" aria-hidden="true">&times;</div>
+            `;
+            container.prepend(toast);
+
+            // close on click
+            toast.querySelector('.close').addEventListener('click', () => removeToast(toast));
+
+            // auto remove after timeout
+            setTimeout(() => {
+                removeToast(toast);
+            }, timeout);
+
+            return toast;
+        }
+
+        function removeToast(toast) {
+            if (!toast) return;
+            toast.style.animation = 'toast-out .28s ease forwards';
+            setTimeout(() => {
+                toast.remove();
+            }, 280);
+        }
+
+        // Action button functionality (Monitor / Manage)
         document.querySelectorAll('.action-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = this.textContent;
+            button.addEventListener('click', function(event) {
+                const action = (this.dataset.action || this.textContent || '').trim();
                 const serverName = this.closest('.server-card').querySelector('.server-name').textContent;
                 
-                if (action === 'Monitor') {
-                    alert(`Opening monitoring dashboard for ${serverName}`);
-                } else if (action === 'Manage') {
-                    alert(`Opening management panel for ${serverName}`);
+                if (action.toLowerCase() === 'monitor') {
+                    event.preventDefault();
+
+                    showToast(`Opening monitoring for ${serverName}...`, 'info', 1800);
+
+                    setTimeout(() => {
+                        window.location.href = `/monitor/${encodeURIComponent(serverName)}`;
+                    }, 2000);
+                } else if (action.toLowerCase() === 'manage') {
+                    event.preventDefault();
+
+                    // prefer explicit data-url if provided
+                    const targetUrl = this.dataset.url || `/server/edit/${encodeURIComponent(this.closest('.server-card').querySelector('form')?.getAttribute('action')?.split('/').pop() || '')}`;
+
+                    showToast(`Opening management for ${serverName}...`, 'success', 1800);
+
+                    setTimeout(() => {
+                        // if the manage link requires a security code use the prompt helper
+                        if (targetUrl && targetUrl.includes('/server/edit')) {
+                            // preserve existing prompt behavior
+                            const code = prompt('Please enter the security code to proceed:');
+                            if (code !== null) {
+                                // redirect and attach code as query param
+                                window.location.href = `${targetUrl}?code=${encodeURIComponent(code)}`;
+                                return;
+                            } else {
+                                // cancelled by user — do nothing
+                                return;
+                            }
+                        }
+                        // fallback redirect
+                        window.location.href = targetUrl || '/dashboard';
+                    }, 2000);
                 } else if (action === 'Restart') {
                     alert(`Initiating restart for ${serverName}`);
                 } else if (action === 'Diagnose') {
