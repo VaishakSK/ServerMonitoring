@@ -529,7 +529,7 @@
             <ul class="nav-menu">
                 <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                <li><a href="/server/add"><i class="fas fa-plus-circle"></i> Add Server</a></li>
+                <li><a href="#" onclick="promptForCodeAndRedirect('/server/add')"><i class="fas fa-plus-circle"></i> Add Server</a></li>
                 <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
                 <li><a href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -615,8 +615,8 @@
                         </div>
                     </div>
                     <div class="server-actions">
-                        <a href="/server/edit/{{this._id}}" class="action-btn btn-success">Manage</a>
-                        <form action="/server/delete/{{this._id}}" method="POST" onsubmit="return confirm('Are you sure you want to delete this server?');">
+                        <a href="#" onclick="promptForCodeAndRedirect('/server/edit/{{this._id}}')" class="action-btn btn-success">Manage</a>
+                        <form action="/server/delete/{{this._id}}" method="POST" onsubmit="return handleDelete(this);">
                             <button type="submit" class="action-btn btn-danger">Delete</button>
                         </form>
                     </div>
@@ -638,6 +638,35 @@
     </footer>
 
     <script>
+        function promptForCodeAndRedirect(url) {
+            const code = prompt('Please enter the security code to proceed:');
+            if (code !== null) { // Proceed if user clicks OK, even with an empty string
+                window.location.href = `${url}?code=${encodeURIComponent(code)}`;
+            }
+        }
+
+        function handleDelete(form) {
+            // Ask for confirmation first
+            if (!confirm('Are you sure you want to delete this server?')) {
+                return false;
+            }
+
+            // Then ask for the security code
+            const code = prompt('Please enter the security code to proceed:');
+            if (code !== null) { // Proceed if user clicks OK
+                // Add the security code as a hidden input to the form
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'code';
+                hiddenInput.value = code;
+                form.appendChild(hiddenInput);
+                return true; // Allow form submission
+            }
+            
+            // Do not submit form if prompt is cancelled
+            return false;
+        }
+
         // Search functionality
         document.querySelector('.search-input').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();

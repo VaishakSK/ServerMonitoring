@@ -4,8 +4,10 @@ const Server = require('../models/server');
 
 // Add Server Page
 router.get('/add', (req, res) => {
+    const securityCode = req.query.code;
     res.render('Server', {
         title: 'Add Server',
+        securityCode: securityCode,
         server: {}
     });
 });
@@ -29,8 +31,10 @@ router.post('/add', async (req, res) => {
 router.get('/edit/:id', async (req, res) => {
     try {
         const server = await Server.findById(req.params.id);
+        const securityCode = req.query.code;
         res.render('Server', {
             title: 'Edit Server',
+            securityCode: securityCode,
             server: server
         });
     } catch (err) {
