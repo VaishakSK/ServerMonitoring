@@ -5,9 +5,16 @@ const Server = require('../models/server');
 // Add Server Page
 router.get('/add', (req, res) => {
     const securityCode = req.query.code;
+    // console.log("Query param (decoded):", securityCode); // 👈 should print server@kle
+
+    // Save to session if matches
+    if (securityCode === process.env.SECURITY_CODE) {
+        req.session.securityCode = securityCode;
+    }
+
     res.render('Server', {
         title: 'Add Server',
-        securityCode: securityCode,
+        securityCode: req.session.securityCode,
         server: {}
     });
 });
@@ -15,8 +22,24 @@ router.get('/add', (req, res) => {
 // Add Server Form Submission
 router.post('/add', async (req, res) => {
     try {
+        // console.log("Session code:", req.session.securityCode);
+        // console.log("Env code:", process.env.SECURITY_CODE);
+
+        // Check against session + env
+        if (!req.session.securityCode || req.session.securityCode !== process.env.SECURITY_CODE) {
+            return res.render('Server', {
+                title: 'Add Server',
+                server: req.body,
+                error: 'Access denied: Invalid or missing security code.'
+            });
+        }
+
         const server = new Server(req.body);
         await server.save();
+
+        // Clear code after successful add (optional)
+        delete req.session.securityCode;
+
         res.redirect('/dashboard');
     } catch (err) {
         res.render('Server', {

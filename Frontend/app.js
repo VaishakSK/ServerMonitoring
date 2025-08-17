@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require("express");
 const mongoose = require('mongoose');
 const hbs = require('hbs');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 
 const app = express();
@@ -18,20 +20,35 @@ const { requireSecurityCode } = require('./middleware/security');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true, // Creates a session for every visitor, which is needed for the security check.
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        collectionName: 'sessions'
+    }),
+    cookie: {
+        // Session expires after 1 week.
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}));
+
 // Set view engine to handlebars
 app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname,  'views'));
+app.set('views', path.join(__dirname, 'views'));
 
 hbs.registerHelper('eq', function (a, b) {
     return a === b;
 });
 
 // Serve static files
-app.use(express.static(path.join(__dirname,  'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Configure MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://vaishak123:vaishaksk@usercredentials.ljwcsrd.mongodb.net/?retryWrites=true&w=majority&appName=userCredentials')
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('MongoDB connected successfully');
         // Start the server only after a successful connection
@@ -59,5 +76,5 @@ app.get('/auth', (req, res) => {
 // Use API routes
 app.use('/', homeRoutes);
 app.use('/api', authRoutes);
-app.use('/server', requireSecurityCode, serverRoutes);
+app.use('/server', serverRoutes);
 app.use('/', dashboardRoutes);
