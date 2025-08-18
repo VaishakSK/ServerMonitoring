@@ -92,7 +92,7 @@ router.post('/edit/:id', async (req, res) => {
 // Delete Server
 router.post('/delete/:id', async (req, res) => {
     try {
-        if (req.session.securityCode === process.env.SECURITY_CODE) {
+        if (req.session.code === process.env.SECURITY_CODE) {
             await Server.findByIdAndDelete(req.params.id);
             res.redirect('/dashboard');
         } else {
