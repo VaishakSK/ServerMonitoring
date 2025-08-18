@@ -64,12 +64,11 @@ router.get('/edit/:id', async (req, res) => {
         if (securityCode === process.env.SECURITY_CODE) {
             req.session.securityCode = securityCode;
             const server = await Server.findById(req.params.id);
-            const existingServerNumbers = await Server.find({ _id: { $ne: req.params.id } }).distinct('serverNumber');
+
             res.render('Server', {
                 title: 'Edit Server',
                 securityCode: securityCode,
-                server: server,
-                existingServerNumbers: JSON.stringify(existingServerNumbers)
+                server: server
             });
         } else {
             res.render('access-denied', {
@@ -88,15 +87,14 @@ router.post('/edit/:id', async (req, res) => {
         res.redirect('/dashboard');
     } catch (err) {
         const server = await Server.findById(req.params.id);
-        const existingServerNumbers = await Server.find({ _id: { $ne: req.params.id } }).distinct('serverNumber');
         res.render('Server', {
             title: 'Edit Server',
             server: req.body,
-            error: err.message,
-            existingServerNumbers: JSON.stringify(existingServerNumbers)
+            error: err.message
         });
     }
 });
+
 
 // Delete Server
 router.post('/delete/:id', async (req, res) => {

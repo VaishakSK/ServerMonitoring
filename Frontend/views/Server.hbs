@@ -127,15 +127,29 @@
                 <label for="model">Server Model</label>
                 <input type="text" id="model" name="model" value="{{server.model}}" required>
             </div>
-            <div class="form-group">
+
+           <div class="form-group">
                 <label for="serverNumber">Server Number</label>
-                <select id="serverNumber" name="serverNumber" required>
-                    {{#each (range 1 10)}}
-                        <option value="{{this}}" {{#if (eq ../server.serverNumber this)}}selected{{/if}}>{{this}}</option>
-                    {{/each}}
-                </select>
+
+                {{!-- If in Add Server, show full dropdown --}}
+                {{#if (eq title "Add Server")}}
+                    <select id="serverNumber" name="serverNumber" required>
+                        {{#each (range 1 10)}}
+                            <option value="{{this}}" {{#if (eq this ../server.serverNumber)}}selected{{/if}}>
+                                {{this}}
+                            </option>
+                        {{/each}}
+                    </select>
+                {{/if}}
+
+                {{!-- If in Edit Server, lock serverNumber to DB value --}}
+                {{#if (eq title "Edit Server")}}
+                    <input type="text" id="serverNumber" name="serverNumber" value="{{server.serverNumber}}" readonly>
+                {{/if}}
+
                 <div id="serverNumberError" class="alert alert-danger" style="display: none;"></div>
             </div>
+
             <div class="form-group">
                 <label for="os">Operating System</label>
                 <select id="os" name="os" required>
