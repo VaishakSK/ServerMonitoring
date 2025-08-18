@@ -10,13 +10,16 @@ router.get('/add', (req, res) => {
     // Save to session if matches
     if (securityCode === process.env.SECURITY_CODE) {
         req.session.securityCode = securityCode;
+        res.render('Server', {
+            title: 'Add Server',
+            securityCode: req.session.securityCode,
+            server: {}
+        });
+    } else {
+        res.render('access-denied', {
+            title: 'Access Denied'
+        });
     }
-
-    res.render('Server', {
-        title: 'Add Server',
-        securityCode: req.session.securityCode,
-        server: {}
-    });
 });
 
 // Add Server Form Submission
@@ -53,13 +56,20 @@ router.post('/add', async (req, res) => {
 // Edit Server Page
 router.get('/edit/:id', async (req, res) => {
     try {
-        const server = await Server.findById(req.params.id);
         const securityCode = req.query.code;
-        res.render('Server', {
-            title: 'Edit Server',
-            securityCode: securityCode,
-            server: server
-        });
+        if (securityCode === process.env.SECURITY_CODE) {
+            req.session.securityCode = securityCode;
+            const server = await Server.findById(req.params.id);
+            res.render('Server', {
+                title: 'Edit Server',
+                securityCode: securityCode,
+                server: server
+            });
+        } else {
+            res.render('access-denied', {
+                title: 'Access Denied'
+            });
+        }
     } catch (err) {
         res.redirect('/dashboard');
     }
@@ -82,8 +92,14 @@ router.post('/edit/:id', async (req, res) => {
 // Delete Server
 router.post('/delete/:id', async (req, res) => {
     try {
-        await Server.findByIdAndDelete(req.params.id);
-        res.redirect('/dashboard');
+        if (req.session.securityCode === process.env.SECURITY_CODE) {
+            await Server.findByIdAndDelete(req.params.id);
+            res.redirect('/dashboard');
+        } else {
+            res.render('access-denied', {
+                title: 'Access Denied'
+            });
+        }
     } catch (err) {
         console.error(`Failed to delete server ${req.params.id}:`, err);
         res.redirect('/dashboard?error=delete_failed'); // Redirect with an error flag

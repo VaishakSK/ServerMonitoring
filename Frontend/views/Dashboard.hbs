@@ -296,7 +296,7 @@
             position: relative;
             overflow: hidden;
         }
-
+        
         .server-card::before {
             content: '';
             position: absolute;
@@ -326,32 +326,22 @@
             margin-bottom: 20px;
         }
 
-        .server-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .server-status {
+        /* status dot positioned at top-right of each server card */
+        .server-card .server-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
             width: 12px;
             height: 12px;
             border-radius: 50%;
+            background: #dc3545; /* default red (offline) */
+            box-shadow: 0 6px 12px rgba(220,53,69,0.14);
+            transition: background .25s ease, box-shadow .25s ease;
+        }
+
+        .server-card .server-status.online {
             background: #28a745;
-            animation: pulse 2s infinite;
-        }
-
-        .server-status.offline {
-            background: #dc3545;
-        }
-
-        .server-status.maintenance {
-            background: #ffc107;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            box-shadow: 0 6px 12px rgba(40,167,69,0.18);
         }
 
         .server-info {
@@ -665,10 +655,15 @@
             
             <div class="server-grid">
                 {{#each servers}}
-                <div class="server-card">
+                <div class="server-card" data-ip="{{this.serverIp}}" data-id="{{this._id}}">
                     <div class="server-header">
                         <div class="server-name">{{this.model}}</div>
                     </div>
+
+                    {{!-- render a single status dot; server-side initial colour from DB status --}}
+                    <span class="server-status {{#if (eq this.status "on")}}online{{/if}}" title="{{this.status}}">
+                    </span>
+
                     <div class="server-info">
                         <div class="info-item">
                             <div class="info-label">Server Number</div>
@@ -711,180 +706,222 @@
         </div>
     </footer>
 
-    <script>
-        function promptForCodeAndRedirect(url) {
-            const code = prompt('Please enter the security code to proceed:');
-            if (code !== null) { // Proceed if user clicks OK, even with an empty string
-                window.location.href = `${url}?code=${encodeURIComponent(code)}`;
-            }
+   <script>
+    function promptForCodeAndRedirect(url) {
+        const code = prompt('Please enter the security code to proceed:');
+        if (code !== null) { // Proceed if user clicks OK, even with an empty string
+            window.location.href = `${url}?code=${encodeURIComponent(code)}`;
         }
+    }
 
-        function handleDelete(form) {
-            // Ask for confirmation first
-            if (!confirm('Are you sure you want to delete this server?')) {
-                return false;
-            }
-
-            // Then ask for the security code
-            const code = prompt('Please enter the security code to proceed:');
-            if (code !== null) { // Proceed if user clicks OK
-                // Add the security code as a hidden input to the form
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'code';
-                hiddenInput.value = code;
-                form.appendChild(hiddenInput);
-                return true; // Allow form submission
-            }
-            
-            // Do not submit form if prompt is cancelled
+    function handleDelete(form) {
+        // Ask for confirmation first
+        if (!confirm('Are you sure you want to delete this server?')) {
             return false;
         }
 
-        // Search functionality
-        document.querySelector('.search-input').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const serverCards = document.querySelectorAll('.server-card');
-            
-            serverCards.forEach(card => {
-                const serverName = card.querySelector('.server-name').textContent.toLowerCase();
-                const serverInfo = card.querySelector('.server-info').textContent.toLowerCase();
-                
-                if (serverName.includes(searchTerm) || serverInfo.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
+        // Then ask for the security code
+        const code = prompt('Please enter the security code to proceed:');
+        if (code !== null) { // Proceed if user clicks OK
+            // Add the security code as a hidden input to the form
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'code';
+            hiddenInput.value = code;
+            form.appendChild(hiddenInput);
+            return true; // Allow form submission
+        }
+        
+        // Do not submit form if prompt is cancelled
+        return false;
+    }
 
-        // Toast helper
-        function ensureToastContainer() {
-            let c = document.querySelector('.toast-container');
-            if (!c) {
-                c = document.createElement('div');
-                c.className = 'toast-container';
-                document.body.appendChild(c);
+    // Search functionality
+    document.querySelector('.search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const serverCards = document.querySelectorAll('.server-card');
+        
+        serverCards.forEach(card => {
+            const serverName = card.querySelector('.server-name').textContent.toLowerCase();
+            const serverInfo = card.querySelector('.server-info').textContent.toLowerCase();
+            
+            if (serverName.includes(searchTerm) || serverInfo.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
             }
-            return c;
-        }
-
-        function showToast(message, type = 'info', timeout = 2000) {
-            const container = ensureToastContainer();
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <div class="icon">${type === 'success' ? '<i class="fas fa-check-circle"></i>' : (type === 'warn' ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>')}</div>
-                <div class="message">${message}</div>
-                <div class="close" aria-hidden="true">&times;</div>
-            `;
-            container.prepend(toast);
-
-            // close on click
-            toast.querySelector('.close').addEventListener('click', () => removeToast(toast));
-
-            // auto remove after timeout
-            setTimeout(() => {
-                removeToast(toast);
-            }, timeout);
-
-            return toast;
-        }
-
-        function removeToast(toast) {
-            if (!toast) return;
-            toast.style.animation = 'toast-out .28s ease forwards';
-            setTimeout(() => {
-                toast.remove();
-            }, 280);
-        }
-
-        // Action button functionality (Monitor / Manage)
-        document.querySelectorAll('.action-btn').forEach(button => {
-            button.addEventListener('click', function(event) {
-                const action = (this.dataset.action || this.textContent || '').trim();
-                const serverName = this.closest('.server-card').querySelector('.server-name').textContent;
-                
-                if (action.toLowerCase() === 'monitor') {
-                    event.preventDefault();
-
-                    showToast(`Opening monitoring for ${serverName}...`, 'info', 1800);
-
-                    setTimeout(() => {
-                        window.location.href = `/monitor/${encodeURIComponent(serverName)}`;
-                    }, 2000);
-                } else if (action.toLowerCase() === 'manage') {
-                    event.preventDefault();
-
-                    // prefer explicit data-url if provided
-                    const targetUrl = this.dataset.url || `/server/edit/${encodeURIComponent(this.closest('.server-card').querySelector('form')?.getAttribute('action')?.split('/').pop() || '')}`;
-
-                    showToast(`Opening management for ${serverName}...`, 'success', 1800);
-
-                    setTimeout(() => {
-                        // if the manage link requires a security code use the prompt helper
-                        if (targetUrl && targetUrl.includes('/server/edit')) {
-                            // preserve existing prompt behavior
-                            const code = prompt('Please enter the security code to proceed:');
-                            if (code !== null) {
-                                // redirect and attach code as query param
-                                window.location.href = `${targetUrl}?code=${encodeURIComponent(code)}`;
-                                return;
-                            } else {
-                                // cancelled by user — do nothing
-                                return;
-                            }
-                        }
-                        // fallback redirect
-                        window.location.href = targetUrl || '/dashboard';
-                    }, 2000);
-                } else if (action === 'Restart') {
-                    alert(`Initiating restart for ${serverName}`);
-                } else if (action === 'Diagnose') {
-                    alert(`Starting diagnostic scan for ${serverName}`);
-                } else if (action === 'Schedule') {
-                    alert(`Opening maintenance scheduler for ${serverName}`);
-                } else if (action === 'Details') {
-                    alert(`Showing detailed information for ${serverName}`);
-                }
-            });
         });
+    });
 
-        // Add some interactive effects
-        document.querySelectorAll('.server-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-8px) scale(1.02)';
-            });
+    // Toast helper
+    function ensureToastContainer() {
+        let c = document.querySelector('.toast-container');
+        if (!c) {
+            c = document.createElement('div');
+            c.className = 'toast-container';
+            document.body.appendChild(c);
+        }
+        return c;
+    }
+
+    function showToast(message, type = 'info', timeout = 2000) {
+        const container = ensureToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="icon">${type === 'success' ? '<i class="fas fa-check-circle"></i>' : (type === 'warn' ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>')}</div>
+            <div class="message">${message}</div>
+            <div class="close" aria-hidden="true">&times;</div>
+        `;
+        container.prepend(toast);
+
+        // close on click
+        toast.querySelector('.close').addEventListener('click', () => removeToast(toast));
+
+        // auto remove after timeout
+        setTimeout(() => {
+            removeToast(toast);
+        }, timeout);
+
+        return toast;
+    }
+
+    function removeToast(toast) {
+        if (!toast) return;
+        toast.style.animation = 'toast-out .28s ease forwards';
+        setTimeout(() => {
+            toast.remove();
+        }, 280);
+    }
+
+    // Action button functionality (Monitor / Manage)
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const action = (this.dataset.action || this.textContent || '').trim();
+            const serverName = this.closest('.server-card').querySelector('.server-name').textContent;
             
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
+            if (action.toLowerCase() === 'monitor') {
+                event.preventDefault();
 
-        // Statistics animation
-        function animateNumbers() {
-            const numbers = document.querySelectorAll('.stat-number');
-            numbers.forEach(number => {
-                const finalValue = parseInt(number.textContent);
-                let currentValue = 0;
-                const increment = finalValue / 20;
-                
-                const timer = setInterval(() => {
-                    currentValue += increment;
-                    if (currentValue >= finalValue) {
-                        number.textContent = finalValue;
-                        clearInterval(timer);
-                    } else {
-                        number.textContent = Math.floor(currentValue);
+                showToast(`Opening monitoring for ${serverName}...`, 'info', 1800);
+
+                setTimeout(() => {
+                    window.location.href = `/monitor/${encodeURIComponent(serverName)}`;
+                }, 2000);
+            } else if (action.toLowerCase() === 'manage') {
+                event.preventDefault();
+
+                // prefer explicit data-url if provided
+                const targetUrl = this.dataset.url || `/server/edit/${encodeURIComponent(this.closest('.server-card').querySelector('form')?.getAttribute('action')?.split('/').pop() || '')}`;
+
+                showToast(`Opening management for ${serverName}...`, 'success', 1800);
+
+                setTimeout(() => {
+                    // if the manage link requires a security code use the prompt helper
+                    if (targetUrl && targetUrl.includes('/server/edit')) {
+                        // preserve existing prompt behavior
+                        const code = prompt('Please enter the security code to proceed:');
+                        if (code !== null) {
+                            // redirect and attach code as query param
+                            window.location.href = `${targetUrl}?code=${encodeURIComponent(code)}`;
+                            return;
+                        } else {
+                            // cancelled by user — do nothing
+                            return;
+                        }
                     }
-                }, 50);
-            });
+                    // fallback redirect
+                    window.location.href = targetUrl || '/dashboard';
+                }, 2000);
+            } else if (action === 'Restart') {
+                alert(`Initiating restart for ${serverName}`);
+            } else if (action === 'Diagnose') {
+                alert(`Starting diagnostic scan for ${serverName}`);
+            } else if (action === 'Schedule') {
+                alert(`Opening maintenance scheduler for ${serverName}`);
+            } else if (action === 'Details') {
+                alert(`Showing detailed information for ${serverName}`);
+            }
+        });
+    });
+
+    // Add some interactive effects
+    document.querySelectorAll('.server-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Statistics animation
+    function animateNumbers() {
+        const numbers = document.querySelectorAll('.stat-number');
+        numbers.forEach(number => {
+            const finalValue = parseInt(number.textContent);
+            let currentValue = 0;
+            const increment = finalValue / 20;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    number.textContent = finalValue;
+                    clearInterval(timer);
+                } else {
+                    number.textContent = Math.floor(currentValue);
+                }
+            }, 50);
+        });
+    }
+
+    // Run animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(animateNumbers, 500);
+    });
+
+    /* helper: update status dots dynamically
+       - Primary: try /api/servers (expects JSON list or {servers: [...]}) returning status field from MongoDB.
+       - Fallback: /api/servers/metrics (infers online from metrics fetch success).
+    */
+    async function fetchServerStatuses() {
+        // attempt to get authoritative status from backend DB endpoint
+        const tryEndpoints = [
+            '/api/servers',              // recommended: should return array [{ _id, serverIp, status, ... }]
+            '/api/servers/status',       // alternative name if implemented
+            '/api/servers/metrics'       // fallback (infers online by ability to fetch metrics)
+        ];
+
+        for (const ep of tryEndpoints) {
+            try {
+                const res = await fetch(ep, { cache: 'no-store' });
+                if (!res.ok) continue;
+                const json = await res.json();
+
+                // normalize result into array of server objects
+                let list = [];
+                if (Array.isArray(json)) list = json;
+                else if (Array.isArray(json.servers)) list = json.servers;
+                else if (Array.isArray(json.results)) {
+                    // /api/servers/metrics format used earlier: results[].server + metrics
+                    list = json.results.map(r => {
+                        return {
+                            serverIp: r.server?.ip || r.server?.serverIp,
+                            status: r.metrics ? 'on' : 'off',
+                            _id: (r.server && r.server._id) || null
+                        };
+                    });
+                }
+
+                // TODO: update your DOM status indicators here using `list`
+                return list;
+            } catch (e) {
+                console.warn(`fetch failed for ${ep}`, e);
+                continue;
+            }
         }
 
-        // Run animation when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(animateNumbers, 500);
-        });
-    </script>
-</body>
-</html>
+        return []; // if all fail
+    }
+</script>
