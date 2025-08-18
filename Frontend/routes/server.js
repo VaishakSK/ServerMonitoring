@@ -3,17 +3,19 @@ const router = express.Router();
 const Server = require('../models/server');
 
 // Add Server Page
-router.get('/add', (req, res) => {
+router.get('/add', async (req, res) => {
     const securityCode = req.query.code;
     // console.log("Query param (decoded):", securityCode); // 👈 should print server@kle
 
     // Save to session if matches
     if (securityCode === process.env.SECURITY_CODE) {
         req.session.securityCode = securityCode;
+        const existingServerNumbers = await Server.find().distinct('serverNumber');
         res.render('Server', {
             title: 'Add Server',
             securityCode: req.session.securityCode,
-            server: {}
+            server: {},
+            existingServerNumbers: JSON.stringify(existingServerNumbers)
         });
     } else {
         res.render('access-denied', {
@@ -45,10 +47,12 @@ router.post('/add', async (req, res) => {
 
         res.redirect('/dashboard');
     } catch (err) {
+        const existingServerNumbers = await Server.find().distinct('serverNumber');
         res.render('Server', {
             title: 'Add Server',
             server: req.body,
-            error: err.message
+            error: 'The Server with the specified details already exists.',
+            existingServerNumbers: JSON.stringify(existingServerNumbers)
         });
     }
 });
@@ -60,10 +64,12 @@ router.get('/edit/:id', async (req, res) => {
         if (securityCode === process.env.SECURITY_CODE) {
             req.session.securityCode = securityCode;
             const server = await Server.findById(req.params.id);
+            const existingServerNumbers = await Server.find({ _id: { $ne: req.params.id } }).distinct('serverNumber');
             res.render('Server', {
                 title: 'Edit Server',
                 securityCode: securityCode,
-                server: server
+                server: server,
+                existingServerNumbers: JSON.stringify(existingServerNumbers)
             });
         } else {
             res.render('access-denied', {
@@ -81,10 +87,13 @@ router.post('/edit/:id', async (req, res) => {
         await Server.findByIdAndUpdate(req.params.id, req.body);
         res.redirect('/dashboard');
     } catch (err) {
+        const server = await Server.findById(req.params.id);
+        const existingServerNumbers = await Server.find({ _id: { $ne: req.params.id } }).distinct('serverNumber');
         res.render('Server', {
             title: 'Edit Server',
             server: req.body,
-            error: err.message
+            error: err.message,
+            existingServerNumbers: JSON.stringify(existingServerNumbers)
         });
     }
 });
@@ -92,7 +101,7 @@ router.post('/edit/:id', async (req, res) => {
 // Delete Server
 router.post('/delete/:id', async (req, res) => {
     try {
-        if (req.session.code === process.env.SECURITY_CODE) {
+        if (req.body.code === process.env.SECURITY_CODE) {
             await Server.findByIdAndDelete(req.params.id);
             res.redirect('/dashboard');
         } else {

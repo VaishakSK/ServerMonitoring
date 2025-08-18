@@ -43,6 +43,18 @@ hbs.registerHelper('eq', function (a, b) {
     return a === b;
 });
 
+hbs.registerHelper('range', function (start, end) {
+    const result = [];
+    for (let i = start; i <= end; i++) {
+        result.push(i);
+    }
+    return result;
+});
+
+hbs.registerHelper('concat', function (a, b) {
+    return a + b;
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));

@@ -122,26 +122,44 @@
             <div class="alert alert-danger">{{error}}</div>
         {{/if}}
 
-        <form action="/server/{{#if server._id}}edit/{{server._id}}{{else}}add{{/if}}" method="POST">
+        <form id="serverForm" action="/server/{{#if server._id}}edit/{{server._id}}{{else}}add{{/if}}" method="POST" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="model">Server Model</label>
                 <input type="text" id="model" name="model" value="{{server.model}}" required>
             </div>
             <div class="form-group">
                 <label for="serverNumber">Server Number</label>
-                <input type="text" id="serverNumber" name="serverNumber" value="{{server.serverNumber}}" required>
+                <select id="serverNumber" name="serverNumber" required>
+                    {{#each (range 1 10)}}
+                        <option value="{{this}}" {{#if (eq ../server.serverNumber this)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+                <div id="serverNumberError" class="alert alert-danger" style="display: none;"></div>
             </div>
             <div class="form-group">
                 <label for="os">Operating System</label>
-                <input type="text" id="os" name="os" value="{{server.os}}" required>
+                <select id="os" name="os" required>
+                    <option value="Windows" {{#if (eq server.os "Windows")}}selected{{/if}}>Windows</option>
+                    <option value="Ubuntu" {{#if (eq server.os "Ubuntu")}}selected{{/if}}>Ubuntu</option>
+                    <option value="Dual Boot" {{#if (eq server.os "Dual Boot")}}selected{{/if}}>Dual Boot</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="ram">RAM</label>
-                <input type="text" id="ram" name="ram" value="{{server.ram}}" required>
+                <select id="ram" name="ram" required>
+                    <option value="64 GB" {{#if (eq server.ram "64 GB")}}selected{{/if}}>64 GB</option>
+                    <option value="128 GB" {{#if (eq server.ram "128 GB")}}selected{{/if}}>128 GB</option>
+                    <option value="256 GB" {{#if (eq server.ram "256 GB")}}selected{{/if}}>256 GB</option>
+                    <option value="512 GB" {{#if (eq server.ram "512 GB")}}selected{{/if}}>512 GB</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="storage">Storage</label>
-                <input type="text" id="storage" name="storage" value="{{server.storage}}" required>
+                <select id="storage" name="storage" required>
+                    {{#each (range 1 20)}}
+                        <option value="{{this}} TB" {{#if (eq ../server.storage (concat this " TB"))}}selected{{/if}}>{{this}} TB</option>
+                    {{/each}}
+                </select>
             </div>
             <div class="form-group">
                 <label for="username">Username</label>
@@ -157,10 +175,16 @@
             <div class="form-group">
                 <label for="serverIp">Server IP</label>
                 <input type="text" id="serverIp" name="serverIp" value="{{server.serverIp}}" required>
+                <div id="serverIpError" class="alert alert-danger" style="display: none;"></div>
             </div>
             <div class="form-group">
                 <label for="allocatedDomain">Allocated Domain</label>
-                <input type="text" id="allocatedDomain" name="allocatedDomain" value="{{server.allocatedDomain}}" required>
+                <select id="allocatedDomain" name="allocatedDomain" required>
+                    <option value="5G" {{#if (eq server.allocatedDomain "5G")}}selected{{/if}}>5G</option>
+                    <option value="EdgeCloud" {{#if (eq server.allocatedDomain "EdgeCloud")}}selected{{/if}}>EdgeCloud</option>
+                    <option value="Openstack" {{#if (eq server.allocatedDomain "Openstack")}}selected{{/if}}>Openstack</option>
+                    <option value="Blockchain" {{#if (eq server.allocatedDomain "Blockchain")}}selected{{/if}}>Blockchain</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="team">Team</label>
@@ -177,6 +201,37 @@
         </form>
     </div>
     <script>
+        const existingServerNumbers = {{{existingServerNumbers}}};
+
+        function validateForm() {
+            const serverNumber = document.getElementById('serverNumber').value;
+            const serverIp = document.getElementById('serverIp').value;
+            const serverNumberError = document.getElementById('serverNumberError');
+            const serverIpError = document.getElementById('serverIpError');
+            let isValid = true;
+
+            // Validate Server Number
+            if (existingServerNumbers.includes(parseInt(serverNumber))) {
+                serverNumberError.textContent = 'Server number already exists.';
+                serverNumberError.style.display = 'block';
+                isValid = false;
+            } else {
+                serverNumberError.style.display = 'none';
+            }
+
+            // Validate Server IP
+            const ipRegex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            if (!ipRegex.test(serverIp)) {
+                serverIpError.textContent = 'Invalid IP address format. Must be xxx.xxx.xxx.xxx with each quadrant between 0-255.';
+                serverIpError.style.display = 'block';
+                isValid = false;
+            } else {
+                serverIpError.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const passwordWrappers = document.querySelectorAll('.password-wrapper');
 

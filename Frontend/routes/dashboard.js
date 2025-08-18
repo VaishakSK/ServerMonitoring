@@ -5,7 +5,7 @@ const Server = require('../models/server');
 // Render the Dashboard view
 router.get('/dashboard', async (req, res) => {
     try {
-        const servers = await Server.find({}).lean();
+        const servers = await Server.find({}).sort({ serverNumber: 1 }).lean();
 
         const stats = {
             totalServers: servers.length,
