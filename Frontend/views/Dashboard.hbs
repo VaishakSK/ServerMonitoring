@@ -800,7 +800,9 @@
     document.querySelectorAll('.action-btn').forEach(button => {
         button.addEventListener('click', function(event) {
             const action = (this.dataset.action || this.textContent || '').trim();
-            const serverName = this.closest('.server-card').querySelector('.server-name').textContent;
+            const serverCard = this.closest('.server-card');
+            const serverName = serverCard.querySelector('.server-name').textContent;
+            const serverIp = serverCard.dataset.ip;
             
             if (action.toLowerCase() === 'monitor') {
                 event.preventDefault();
@@ -808,7 +810,7 @@
                 showToast(`Opening monitoring for ${serverName}...`, 'info', 1800);
 
                 setTimeout(() => {
-                    window.location.href = `/monitor/${encodeURIComponent(serverName)}`;
+                    window.location.href = `/monitor?ip=${encodeURIComponent(serverIp)}&name=${encodeURIComponent(serverName)}`;
                 }, 2000);
             } else if (action.toLowerCase() === 'manage') {
                 event.preventDefault();
