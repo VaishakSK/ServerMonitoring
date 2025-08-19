@@ -8,10 +8,15 @@ const serverSchema = new mongoose.Schema({
         trim: true
     },
     serverNumber: {
-        type: String,
+        type: Number,
         required: [true, 'Server number is required'],
         unique: true,
-        trim: true
+        max: [100, 'Server number must be within 100'],
+        min: [1, 'Server number must be a positive integer'],
+        validate: {
+            validator: Number.isInteger,
+            message: 'Server number must be an integer'
+        }
     },
     os: {
         type: String,
@@ -43,16 +48,16 @@ const serverSchema = new mongoose.Schema({
         required: [true, 'Server IP is required'],
         trim: true
     },
-    allocatedDomain: {
+    allocatedDomain: [{
         type: String,
         required: [true, 'Allocated domain is required'],
         trim: true
-    },
-    team: {
+    }],
+    team: [{
         type: String,
         required: [true, 'Team assignment is required'],
         trim: true
-    },
+    }],
     status: {
         type: String,
         enum: ['on', 'off'],  // restricts values to "on" or "off"

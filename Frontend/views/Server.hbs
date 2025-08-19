@@ -112,60 +112,517 @@
             cursor: pointer;
             color: #6c757d;
         }
+
+        /* Modern tags input */
+        .tags-input {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: linear-gradient(180deg, #ffffff, #fafbfc);
+        }
+
+        .tags-input:focus-within {
+            border-color: #dc3545;
+            box-shadow: 0 6px 18px rgba(220, 53, 69, 0.15);
+        }
+
+        .tags-input .tags {
+            display: contents;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            font-weight: 600;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .tag .remove-tag {
+            margin-left: 8px;
+            background: transparent;
+            border: none;
+            color: #c82333;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .tags-input input[type="text"] {
+            min-width: 180px;
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 6px 8px;
+            font-size: 1rem;
+            background: transparent;
+        }
+
+        .suggestions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px dashed rgba(220, 53, 69, 0.5);
+            color: #dc3545;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(220, 53, 69, 0.08);
+            transform: translateY(-1px);
+        }
+
+        /* ------------------------------ */
+        /* Modern Red-Themed Overrides    */
+        /* ------------------------------ */
+        :root {
+            --red-25: #fff5f6;
+            --red-50: #ffe9eb;
+            --red-100: #ffd3d7;
+            --red-200: #ffb3b8;
+            --red-300: #ff8a94;
+            --red-400: #f15a69;
+            --red-500: #dc3545; /* primary */
+            --red-600: #c82333;
+            --red-700: #b31e2c;
+            --red-800: #8f1824;
+            --red-900: #5a0f17;
+            --ink: #1f2328;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(220, 53, 69, 0.12);
+        }
+
+        body {
+            background: radial-gradient(1200px 600px at 10% -10%, var(--red-50), transparent 40%),
+                        radial-gradient(900px 500px at 90% 0%, var(--red-50), transparent 40%),
+                        linear-gradient(180deg, #fafafa, #f6f7f9);
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 60px rgba(220, 53, 69, 0.08), 0 12px 24px rgba(31, 35, 40, 0.04);
+            backdrop-filter: saturate(140%) blur(10px);
+        }
+
+        h1 {
+            letter-spacing: -0.02em;
+            background: linear-gradient(180deg, var(--red-500), var(--red-700));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            color: #5a5f66;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: linear-gradient(180deg, #ffffff, #fafafb);
+            border: 1px solid #e8eaee;
+            border-radius: 12px;
+            box-shadow: 0 1px 0 rgba(31, 35, 40, 0.02) inset;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: #e1e4ea;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--red-500);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12), 0 6px 14px rgba(220, 53, 69, 0.08);
+        }
+
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--red-500), var(--red-700));
+            border: 1px solid rgba(184, 28, 41, 0.4);
+        }
+
+        .btn-primary::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 120%;
+            height: 100%;
+            transform: skewX(-20deg);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::after {
+            left: 150%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(220, 53, 69, 0.24);
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: var(--red-600);
+            background: #fff;
+            border: 1px solid rgba(220, 53, 69, 0.35);
+            transition: all .2s ease;
+        }
+        .btn-secondary:hover {
+            background: var(--red-25);
+            box-shadow: 0 10px 24px rgba(220, 53, 69, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .password-wrapper .toggle-password {
+            color: #8b9096;
+            transition: color .2s ease;
+            left: auto;
+        }
+        .password-wrapper .toggle-password:hover {
+            color: var(--red-600);
+        }
+
+        .tags-input {
+            border-color: #e8eaee;
+            background: linear-gradient(180deg, #ffffff, #fbfcfd);
+        }
+        .tags-input:focus-within {
+            border-color: var(--red-500);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12), 0 8px 20px rgba(220, 53, 69, 0.08);
+        }
+        .tag {
+            background: linear-gradient(180deg, rgba(220, 53, 69, 0.12), rgba(220, 53, 69, 0.08));
+            border-color: rgba(220, 53, 69, 0.35);
+        }
+        .tag .remove-tag {
+            color: var(--red-600);
+        }
+
+        .checkbox-chip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(220, 53, 69, 0.18);
+            background: linear-gradient(180deg, #ffffff, #f7f9fc);
+            box-shadow: 0 4px 14px rgba(31, 35, 40, 0.04);
+            color: #333;
+            cursor: pointer;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+            user-select: none;
+            overflow: hidden;
+        }
+        .checkbox-chip:hover {
+            border-color: rgba(220, 53, 69, 0.35);
+            box-shadow: 0 10px 26px rgba(220, 53, 69, 0.10);
+            transform: translateY(-1px);
+        }
+        .checkbox-chip:focus-within {
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.16), 0 10px 26px rgba(220, 53, 69, 0.10);
+        }   
+        /* Visually hide native checkbox, keep accessible */
+        .checkbox-chip input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+        /* Chip face */
+        .checkbox-chip span {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(220,53,69,0.06), rgba(220,53,69,0.03));
+            color: var(--red-700);
+            font-weight: 700;
+            letter-spacing: .01em;
+            border: 1px solid rgba(220, 53, 69, 0.25);
+            transition: all .18s ease;
+        }
+        /* Selected state */
+        .checkbox-chip input[type="checkbox"]:checked + span {
+            color: #fff;
+            background: linear-gradient(135deg, var(--red-500), var(--red-700));
+            border-color: rgba(184, 28, 41, 0.5);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .alert-danger {
+            background: linear-gradient(180deg, var(--red-500), var(--red-700));
+            box-shadow: 0 8px 22px rgba(220, 53, 69, 0.25);
+        }
+
+        /* Checkbox chip group for multi-select domains */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .checkbox-chip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 2px solid #e9ecef;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all .2s ease;
+            user-select: none;
+        }
+        .checkbox-chip:hover {
+            border-color: #f0a3ab;
+            box-shadow: 0 6px 18px rgba(220, 53, 69, 0.12);
+        }
+        /* remove legacy square checkbox visuals (now hidden) */
+
+        /* Selected state styling for domain chips */
+        .checkbox-chip input[type="checkbox"]:checked + span {
+            color: #fff;
+            background: linear-gradient(135deg, var(--red-500), var(--red-700));
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+
+        /* Multi-select (Teams) */
+        .multi-select {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid #e8eaee;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #ffffff, #fbfcfd);
+            box-shadow: 0 1px 0 rgba(31, 35, 40, 0.02) inset;
+        }
+        .multi-select:focus-within {
+            border-color: var(--red-500);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12), 0 8px 20px rgba(220, 53, 69, 0.08);
+        }
+        .multi-select .selected-chips {
+            display: contents;
+        }
+        .multi-select .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(220, 53, 69, 0.12), rgba(220, 53, 69, 0.08));
+            color: var(--red-600);
+            font-weight: 600;
+            border: 1px solid rgba(220, 53, 69, 0.35);
+        }
+        .multi-select .chip button {
+            background: transparent;
+            border: none;
+            color: var(--red-600);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .multi-select input[type="text"] {
+            flex: 1;
+            min-width: 160px;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 6px 4px;
+        }
+        .multi-select .options {
+            position: absolute;
+            z-index: 10;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e8eaee;
+            border-radius: 12px;
+            box-shadow: 0 18px 40px rgba(220, 53, 69, 0.12), 0 6px 16px rgba(31, 35, 40, 0.08);
+            max-height: 220px;
+            overflow: auto;
+            padding: 8px;
+            display: none;
+        }
+        .multi-select.open .options { display: block; }
+        .multi-select .option {
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #333;
+        }
+        .multi-select .option:hover {
+            background: var(--red-25);
+            color: var(--red-700);
+        }
+        .multi-select .option.selected {
+            background: linear-gradient(180deg, var(--red-50), #fff);
+            border: 1px solid var(--red-100);
+            color: var(--red-700);
+        }
+
+        /* Floating back button hover effects */
+        .floating-back {
+            backdrop-filter: blur(8px) saturate(140%);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(220, 53, 69, 0.25);
+            box-shadow: 0 8px 24px rgba(220, 53, 69, 0.12);
+        }
+        .floating-back:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+        }
+
+        /* Section headers */
+        .section {
+            padding: 16px;
+            border: 1px solid #eef0f3;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff, #fbfcfd);
+            margin-bottom: 18px;
+        }
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #8b9096;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        /* Input group with icons */
+        .input-with-icon {
+            position: relative;
+        }
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b3b8be;
+        }
+        .input-with-icon input {
+            padding-left: 36px;
+        }
+
+        /* Subtle form divider */
+        .form-divider {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(220,53,69,0), rgba(220,53,69,.25), rgba(220,53,69,0));
+            border: none;
+            margin: 14px 0;
+        }
+
+        /* Animated focus ring */
+        .form-group input:focus, .form-group select:focus {
+            transition: box-shadow .2s ease, border-color .2s ease;
+        }
     </style>
 </head>
 <body>
+    <a href="/dashboard" class="btn-secondary floating-back" style="position: fixed; top: 16px; left: 16px; z-index: 1000; text-decoration: none;">← Back to Dashboard</a>
     <div class="container">
         <h1>{{title}}</h1>
+        {{#if activeTeamsCount}}
+            <p style="text-align:center; margin-top:8px; color:#5a5f66; font-weight:600;">
+                Total active teams: {{activeTeamsCount}}
+            </p>
+        {{/if}}
 
         {{#if error}}
             <div class="alert alert-danger">{{error}}</div>
         {{/if}}
 
         <form id="serverForm" action="/server/{{#if server._id}}edit/{{server._id}}{{else}}add{{/if}}" method="POST" onsubmit="return validateForm()">
-            <div class="form-group">
-                <label for="model">Server Model</label>
-                <input type="text" id="model" name="model" value="{{server.model}}" required>
-            </div>
-
-           <div class="form-group">
-                <label for="serverNumber">Server Number</label>
-
-                {{!-- If in Add Server, show full dropdown --}}
-                {{#if (eq title "Add Server")}}
-                    <select id="serverNumber" name="serverNumber" required>
-                        {{#each (range 1 10)}}
-                            <option value="{{this}}" {{#if (eq this ../server.serverNumber)}}selected{{/if}}>
-                                {{this}}
-                            </option>
+            <div class="section">
+                <div class="section-title">Hardware</div>
+                <div class="form-group">
+                    <label for="model">Server Model</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-microchip"></i>
+                        <input type="text"  placeholder="Ex: DELL R440" id="model" name="model" value="{{server.model}}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="serverNumber">Server Number</label>
+                    {{!-- If in Add Server, show full dropdown --}}
+                    {{#if (eq title "Add Server")}}
+                        <select id="serverNumber" name="serverNumber" required>
+                            {{#each (range 1 10)}}
+                                <option value="{{this}}" {{#if (eq this ../server.serverNumber)}}selected{{/if}}>
+                                    {{this}}
+                                </option>
+                            {{/each}}
+                        </select>
+                    {{/if}}
+                    {{!-- If in Edit Server, lock serverNumber to DB value --}}
+                    {{#if (eq title "Edit Server")}}
+                        <input type="text" id="serverNumber" name="serverNumber" value="{{server.serverNumber}}" readonly>
+                    {{/if}}
+                    <div id="serverNumberError" class="alert alert-danger" style="display: none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="storage">Storage</label>
+                    <select id="storage" name="storage" required>
+                        {{#each (range 1 20)}}
+                            <option value="{{this}} TB" {{#if (eq ../server.storage (concat this " TB"))}}selected{{/if}}>{{this}} TB</option>
                         {{/each}}
                     </select>
-                {{/if}}
-
-                {{!-- If in Edit Server, lock serverNumber to DB value --}}
-                {{#if (eq title "Edit Server")}}
-                    <input type="text" id="serverNumber" name="serverNumber" value="{{server.serverNumber}}" readonly>
-                {{/if}}
-
-                <div id="serverNumberError" class="alert alert-danger" style="display: none;"></div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="os">Operating System</label>
-                <select id="os" name="os" required>
-                    <option value="Windows" {{#if (eq server.os "Windows")}}selected{{/if}}>Windows</option>
-                    <option value="Ubuntu" {{#if (eq server.os "Ubuntu")}}selected{{/if}}>Ubuntu</option>
-                    <option value="Dual Boot" {{#if (eq server.os "Dual Boot")}}selected{{/if}}>Dual Boot</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="ram">RAM</label>
-                <select id="ram" name="ram" required>
-                    <option value="64 GB" {{#if (eq server.ram "64 GB")}}selected{{/if}}>64 GB</option>
-                    <option value="128 GB" {{#if (eq server.ram "128 GB")}}selected{{/if}}>128 GB</option>
-                    <option value="256 GB" {{#if (eq server.ram "256 GB")}}selected{{/if}}>256 GB</option>
-                    <option value="512 GB" {{#if (eq server.ram "512 GB")}}selected{{/if}}>512 GB</option>
-                </select>
+            <div class="section">
+                <div class="section-title">System</div>
+                <div class="form-group">
+                    <label for="os">Operating System</label>
+                    <select id="os" name="os" required>
+                        <option value="Windows" {{#if (eq server.os "Windows")}}selected{{/if}}>Windows</option>
+                        <option value="Ubuntu" {{#if (eq server.os "Ubuntu")}}selected{{/if}}>Ubuntu</option>
+                        <option value="Dual Boot" {{#if (eq server.os "Dual Boot")}}selected{{/if}}>Dual Boot</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ram">RAM</label>
+                    <select id="ram" name="ram" required>
+                        <option value="64 GB" {{#if (eq server.ram "64 GB")}}selected{{/if}}>64 GB</option>
+                        <option value="128 GB" {{#if (eq server.ram "128 GB")}}selected{{/if}}>128 GB</option>
+                        <option value="256 GB" {{#if (eq server.ram "256 GB")}}selected{{/if}}>256 GB</option>
+                        <option value="512 GB" {{#if (eq server.ram "512 GB")}}selected{{/if}}>512 GB</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
                 <label for="storage">Storage</label>
@@ -175,49 +632,100 @@
                     {{/each}}
                 </select>
             </div>
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" value="{{server.username}}" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" value="{{server.password}}" required>
-                    <i class="fas fa-eye-slash toggle-password"></i>
+            <div class="section">
+                <div class="section-title">Credentials</div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" value="{{server.username}}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" value="{{server.password}}" required>
+                        <i class="fas fa-eye-slash toggle-password"></i>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="serverIp">Server IP</label>
-                <input type="text" id="serverIp" name="serverIp" value="{{server.serverIp}}" required>
-                <div id="serverIpError" class="alert alert-danger" style="display: none;"></div>
+            <div class="section">
+                <div class="section-title">Network</div>
+                <div class="form-group">
+                    <label for="serverIp">Server IP</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-network-wired"></i>
+                        <input type="text"  placeholder="Ex: 192.168.61.10" id="serverIp" name="serverIp" value="{{server.serverIp}}" required>
+                    </div>
+                    <div id="serverIpError" class="alert alert-danger" style="display: none;"></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="allocatedDomain">Allocated Domain</label>
-                <select id="allocatedDomain" name="allocatedDomain" required>
-                    <option value="5G" {{#if (eq server.allocatedDomain "5G")}}selected{{/if}}>5G</option>
-                    <option value="EdgeCloud" {{#if (eq server.allocatedDomain "EdgeCloud")}}selected{{/if}}>EdgeCloud</option>
-                    <option value="Openstack" {{#if (eq server.allocatedDomain "Openstack")}}selected{{/if}}>Openstack</option>
-                    <option value="Blockchain" {{#if (eq server.allocatedDomain "Blockchain")}}selected{{/if}}>Blockchain</option>
-                </select>
+            <div class="section">
+                <div class="section-title">Allocated Domains</div>
+                <div class="checkbox-group" id="allocatedDomainGroup">
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="allocatedDomain[]" value="5G">
+                        <span>5G</span>
+                    </label>
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="allocatedDomain[]" value="EdgeCloud">
+                        <span>EdgeCloud</span>
+                    </label>
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="allocatedDomain[]" value="Openstack">
+                        <span>Openstack</span>
+                    </label>
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="allocatedDomain[]" value="Blockchain">
+                        <span>Blockchain</span>
+                    </label>
+                </div>
+                <input type="hidden" id="initialAllocatedDomain" value="{{server.allocatedDomain}}">
+                <div id="allocatedDomainError" class="alert alert-danger" style="display:none; margin-top:10px;">Select at least one domain.</div>
             </div>
-            <div class="form-group">
-                <label for="team">Team</label>
-                <input type="text" id="team" name="team" value="{{server.team}}" required>
+            <div class="section">
+                <div class="section-title">Teams</div>
+                <div class="multi-select" id="teamMultiSelect">
+                    <div class="selected-chips">
+                        {{#if server.team}}
+                            {{#each server.team}}
+                                <span class="chip" data-value="{{this}}">{{this}} <button type="button" class="remove" aria-label="Remove">&times;</button></span>
+                            {{/each}}
+                        {{/if}}
+                    </div>
+                    <input type="text" id="teamSearch" placeholder="Type team name" aria-label="Type team name">
+                </div>
+                <button type="button" id="addTeamBtn" class="btn-secondary" style="margin-top:10px;">Add team</button>
+                <input type="hidden" id="team" name="team" required>
+                <div id="teamError" class="alert alert-danger" style="display:none; margin-top:10px;">Add at least one team.</div>
             </div>
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                    <option value="on" {{#if (eq server.status 'on')}}selected{{/if}}>On</option>
-                    <option value="off" {{#if (eq server.status 'off')}}selected{{/if}}>Off</option>
-                </select>
+            <div class="section">
+                <div class="section-title">Power</div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="on" {{#if (eq server.status 'on')}}selected{{/if}}>On</option>
+                        <option value="off" {{#if (eq server.status 'off')}}selected{{/if}}>Off</option>
+                    </select>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">{{title}}</button>
         </form>
     </div>
     <script>
-        const existingServerNumbers = {{{existingServerNumbers}}};
+        const existingServerNumbersRaw = {{#if existingServerNumbers}}{{{existingServerNumbers}}}{{else}}[]{{/if}};
+        const existingServerNumbers = (existingServerNumbersRaw || [])
+            .map(n => parseInt(n, 10))
+            .filter(n => !Number.isNaN(n));
 
         function validateForm() {
+            // Flush any pending team input before validating
+            const teamSearch = document.getElementById('teamSearch');
+            if (teamSearch && teamSearch.value.trim() && window.teamMulti) {
+                window.teamMulti.addValue(teamSearch.value.trim());
+                teamSearch.value = '';
+            }
             const serverNumber = document.getElementById('serverNumber').value;
             const serverIp = document.getElementById('serverIp').value;
             const serverNumberError = document.getElementById('serverNumberError');
@@ -231,6 +739,27 @@
                 isValid = false;
             } else {
                 serverNumberError.style.display = 'none';
+            }
+
+            // Validate Domains (at least one)
+            const domainCheckboxes = document.querySelectorAll('#allocatedDomainGroup input[type="checkbox"]');
+            const domainError = document.getElementById('allocatedDomainError');
+            const anyChecked = Array.from(domainCheckboxes).some(cb => cb.checked);
+            if (!anyChecked) {
+                domainError.style.display = 'block';
+                isValid = false;
+            } else {
+                domainError.style.display = 'none';
+            }
+
+            // Validate Teams (at least one)
+            const teamHidden = document.getElementById('team');
+            const teamError = document.getElementById('teamError');
+            if (!teamHidden.value.trim()) {
+                teamError.style.display = 'block';
+                isValid = false;
+            } else {
+                teamError.style.display = 'none';
             }
 
             // Validate Server IP
@@ -264,6 +793,102 @@
                     });
                 }
             });
+
+            // Multi-select for Teams (free text + button/enter to add)
+            function initTeamMultiSelect() {
+                const container = document.getElementById('teamMultiSelect');
+                const chipsContainer = container.querySelector('.selected-chips');
+                const searchInput = document.getElementById('teamSearch');
+                const hidden = document.getElementById('team');
+
+                function getValues() {
+                    return Array.from(chipsContainer.querySelectorAll('.chip'))
+                        .map(c => c.dataset.value);
+                }
+
+                function syncHidden() {
+                    const values = getValues();
+                    hidden.value = values.join(',');
+                    if (hidden.hasAttribute('required')) {
+                        hidden.setCustomValidity(values.length ? '' : 'Please add at least one team.');
+                        document.getElementById('teamError').style.display = values.length ? 'none' : 'block';
+                    }
+                }
+
+                function addValue(value) {
+                    const normalized = String(value).trim();
+                    if (!normalized) return;
+                    const current = getValues();
+                    if (current.includes(normalized)) return;
+                    const chip = document.createElement('span');
+                    chip.className = 'chip';
+                    chip.dataset.value = normalized;
+                    chip.innerHTML = `${normalized} <button type="button" class="remove" aria-label="Remove">&times;</button>`;
+                    chipsContainer.appendChild(chip);
+                    syncHidden();
+                }
+
+                function removeValue(value) {
+                    const chip = Array.from(chipsContainer.querySelectorAll('.chip')).find(c => c.dataset.value === value);
+                    if (chip) chip.remove();
+                    syncHidden();
+                }
+
+                // Seed hidden from initial chips
+                syncHidden();
+
+                // Handlers
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && searchInput.value.trim()) {
+                        e.preventDefault();
+                        addValue(searchInput.value.trim());
+                        searchInput.value = '';
+                    } else if (e.key === 'Backspace' && searchInput.value === '') {
+                        const chips = chipsContainer.querySelectorAll('.chip');
+                        if (chips.length) {
+                            const last = chips[chips.length - 1];
+                            removeValue(last.dataset.value);
+                        }
+                    }
+                });
+                chipsContainer.addEventListener('click', (e) => {
+                    if (e.target && e.target.classList.contains('remove')) {
+                        const chip = e.target.closest('.chip');
+                        removeValue(chip.dataset.value);
+                    }
+                });
+                const addBtn = document.getElementById('addTeamBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', () => {
+                        if (searchInput.value.trim()) {
+                            addValue(searchInput.value.trim());
+                            searchInput.value = '';
+                        }
+                    });
+                }
+
+                return { addValue, removeValue, syncHidden };
+            }
+
+            const teamMulti = initTeamMultiSelect();
+            window.teamMulti = teamMulti;
+
+            // Pre-check domains from server data
+            const initialDomainsRaw = document.getElementById('initialAllocatedDomain')?.value || '';
+            const initialDomains = Array.isArray(initialDomainsRaw)
+                ? initialDomainsRaw
+                : String(initialDomainsRaw)
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+            if (initialDomains.length) {
+                const checkboxes = document.querySelectorAll('#allocatedDomainGroup input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    if (initialDomains.includes(cb.value)) {
+                        cb.checked = true;
+                    }
+                });
+            }
         });
     </script>
 </body>

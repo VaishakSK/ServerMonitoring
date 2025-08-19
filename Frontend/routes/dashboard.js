@@ -7,11 +7,17 @@ router.get('/dashboard', async (req, res) => {
     try {
         const servers = await Server.find({}).sort({ serverNumber: 1 }).lean();
 
+        const totalTeams = servers.reduce((sum, server) => {
+            if (Array.isArray(server.team)) return sum + server.team.length;
+            if (server.team == null) return sum;
+            return sum + 1; // handle legacy single-value strings
+        }, 0);
+
         const stats = {
             totalServers: servers.length,
             onlineServers: servers.filter(s => s.status === 'on').length,
             offlineServers: servers.filter(s => s.status === 'off').length,
-            activeTeams: new Set(servers.map(s => s.team)).size
+            activeTeams: totalTeams
         };
 
         res.render('Dashboard', {

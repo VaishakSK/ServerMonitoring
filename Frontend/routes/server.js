@@ -2,6 +2,19 @@ const express = require('express');
 const router = express.Router();
 const Server = require('../models/server');
 
+// Helper to compute total active teams (sum of all team assignments across servers)
+async function getActiveTeamsCount() {
+    try {
+        const result = await Server.aggregate([
+            { $unwind: '$team' },
+            { $count: 'count' }
+        ]);
+        return (result && result[0] && result[0].count) || 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
 // Add Server Page
 router.get('/add', async (req, res) => {
     const securityCode = req.query.code;
@@ -11,11 +24,13 @@ router.get('/add', async (req, res) => {
     if (securityCode === process.env.SECURITY_CODE) {
         req.session.securityCode = securityCode;
         const existingServerNumbers = await Server.find().distinct('serverNumber');
+        const activeTeamsCount = await getActiveTeamsCount();
         res.render('Server', {
             title: 'Add Server',
             securityCode: req.session.securityCode,
             server: {},
-            existingServerNumbers: JSON.stringify(existingServerNumbers)
+            existingServerNumbers: JSON.stringify(existingServerNumbers),
+            activeTeamsCount: activeTeamsCount
         });
     } else {
         res.render('access-denied', {
@@ -32,14 +47,63 @@ router.post('/add', async (req, res) => {
 
         // Check against session + env
         if (!req.session.securityCode || req.session.securityCode !== process.env.SECURITY_CODE) {
+            const existingServerNumbers = await Server.find().distinct('serverNumber');
+            const activeTeamsCount = await getActiveTeamsCount();
             return res.render('Server', {
                 title: 'Add Server',
                 server: req.body,
-                error: 'Access denied: Invalid or missing security code.'
+                error: 'Access denied: Invalid or missing security code.',
+                existingServerNumbers: JSON.stringify(existingServerNumbers),
+                activeTeamsCount: activeTeamsCount
             });
         }
 
-        const server = new Server(req.body);
+        const normalizeToArray = (value) => {
+            if (Array.isArray(value)) {
+                return value.map(v => String(v).trim()).filter(v => v);
+            }
+            if (typeof value === 'string') {
+                return value
+                    .split(',')
+                    .map(v => v.trim())
+                    .filter(v => v);
+            }
+            return [];
+        };
+
+        const serverData = {
+            ...req.body,
+            serverNumber: Number.parseInt(req.body.serverNumber, 10),
+            team: normalizeToArray(req.body.team),
+            allocatedDomain: normalizeToArray(req.body.allocatedDomain)
+        };
+
+        // Pre-check uniqueness to provide clearer error instead of relying on Mongo duplicate error
+        if (Number.isNaN(serverData.serverNumber)) {
+            const existingServerNumbers = await Server.find().distinct('serverNumber');
+            const activeTeamsCount = await getActiveTeamsCount();
+            return res.render('Server', {
+                title: 'Add Server',
+                server: req.body,
+                error: 'Server number is invalid.',
+                existingServerNumbers: JSON.stringify(existingServerNumbers),
+                activeTeamsCount: activeTeamsCount
+            });
+        }
+        const numberExists = await Server.exists({ serverNumber: serverData.serverNumber });
+        if (numberExists) {
+            const existingServerNumbers = await Server.find().distinct('serverNumber');
+            const activeTeamsCount = await getActiveTeamsCount();
+            return res.render('Server', {
+                title: 'Add Server',
+                server: req.body,
+                error: 'A server with this server number already exists.',
+                existingServerNumbers: JSON.stringify(existingServerNumbers),
+                activeTeamsCount: activeTeamsCount
+            });
+        }
+
+        const server = new Server(serverData);
         await server.save();
 
         // Clear code after successful add (optional)
@@ -48,11 +112,23 @@ router.post('/add', async (req, res) => {
         res.redirect('/dashboard');
     } catch (err) {
         const existingServerNumbers = await Server.find().distinct('serverNumber');
+        const activeTeamsCount = await getActiveTeamsCount();
+        let errorMessage = 'Failed to add server.';
+        if (err && err.code === 11000) {
+            const field = Object.keys(err.keyValue || {})[0] || 'field';
+            errorMessage = `Duplicate value for ${field}. A server with this ${field} already exists.`;
+        } else if (err && err.name === 'ValidationError') {
+            const messages = Object.values(err.errors || {}).map(e => e.message);
+            errorMessage = messages.join(' ');
+        } else if (err && typeof err.message === 'string') {
+            errorMessage = err.message;
+        }
         res.render('Server', {
             title: 'Add Server',
             server: req.body,
-            error: 'The Server with the specified details already exists.',
-            existingServerNumbers: JSON.stringify(existingServerNumbers)
+            error: errorMessage,
+            existingServerNumbers: JSON.stringify(existingServerNumbers),
+            activeTeamsCount: activeTeamsCount
         });
     }
 });
@@ -64,11 +140,13 @@ router.get('/edit/:id', async (req, res) => {
         if (securityCode === process.env.SECURITY_CODE) {
             req.session.securityCode = securityCode;
             const server = await Server.findById(req.params.id);
+            const activeTeamsCount = await getActiveTeamsCount();
 
             res.render('Server', {
                 title: 'Edit Server',
                 securityCode: securityCode,
-                server: server
+                server: server,
+                activeTeamsCount: activeTeamsCount
             });
         } else {
             res.render('access-denied', {
@@ -83,14 +161,35 @@ router.get('/edit/:id', async (req, res) => {
 // Edit Server Form Submission
 router.post('/edit/:id', async (req, res) => {
     try {
-        await Server.findByIdAndUpdate(req.params.id, req.body);
+        const normalizeToArray = (value) => {
+            if (Array.isArray(value)) {
+                return value.map(v => String(v).trim()).filter(v => v);
+            }
+            if (typeof value === 'string') {
+                return value
+                    .split(',')
+                    .map(v => v.trim())
+                    .filter(v => v);
+            }
+            return [];
+        };
+
+        const serverData = {
+            ...req.body,
+            serverNumber: Number.parseInt(req.body.serverNumber, 10),
+            team: normalizeToArray(req.body.team),
+            allocatedDomain: normalizeToArray(req.body.allocatedDomain)
+        };
+        await Server.findByIdAndUpdate(req.params.id, serverData);
         res.redirect('/dashboard');
     } catch (err) {
         const server = await Server.findById(req.params.id);
+        const activeTeamsCount = await getActiveTeamsCount();
         res.render('Server', {
             title: 'Edit Server',
             server: req.body,
-            error: err.message
+            error: err.message,
+            activeTeamsCount: activeTeamsCount
         });
     }
 });
