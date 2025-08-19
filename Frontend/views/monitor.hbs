@@ -87,7 +87,6 @@
         .kpi-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; min-height: 110px; }
         .kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
         .kpi-value { font-weight: 700; font-size: 1.4rem; }
-        .spark { width: 100%; height: 32px; max-height: 32px; margin-top: 8px; display: block; }
         .progress { height: 8px; background: rgba(148,163,184,0.25); border-radius: 999px; overflow: hidden; margin-top: 10px; flex: 0 0 auto; }
         .progress > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--primary), #22c55e, #06b6d4); background-size: 200% 100%; animation: progressGlow 4s linear infinite; transition: width 0.3s ease; }
         .progress.warn > span { background: var(--warning); }
@@ -192,19 +191,16 @@
             <div class="kpi-title">CPU Utilization</div>
             <div class="kpi-value" id="cpu-kpi">0%</div>
             <div class="progress" id="cpu-progress"><span></span></div>
-            <canvas id="spark-cpu" class="spark"></canvas>
         </div>
         <div class="kpi-card">
             <div class="kpi-title">Memory Used</div>
             <div class="kpi-value" id="mem-kpi">0 GB</div>
             <div class="progress" id="mem-progress"><span></span></div>
-            <canvas id="spark-mem" class="spark"></canvas>
         </div>
         <div class="kpi-card">
             <div class="kpi-title">Disk Used (C:)</div>
             <div class="kpi-value" id="disk-kpi">0 GB</div>
             <div class="progress" id="disk-progress"><span></span></div>
-            <canvas id="spark-disk" class="spark"></canvas>
         </div>
         <div class="kpi-card">
             <div class="kpi-title">Samples Collected</div>
@@ -239,6 +235,10 @@
             <div class="insight-value" id="last-boot">—</div>
         </div>
         <div class="insight-card">
+            <div class="insight-title">System Uptime</div>
+            <div class="insight-value" id="system-uptime">—</div>
+        </div>
+        <div class="insight-card">
             <div class="insight-title">Last Shutdown</div>
             <div class="insight-value" id="last-shutdown">Unavailable from metrics</div>
         </div>
@@ -259,6 +259,9 @@
         </div>
         <div class="chart-container">
             <canvas id="netChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="netSpeedChart"></canvas>
         </div>
         <div class="chart-container">
             <canvas id="diskIoChart"></canvas>
@@ -346,7 +349,10 @@
         const diskChart = createDoughnutChart(diskChartCtx, 'Disk Usage (C:) (GB)', ['Used', 'Free']);
 
         const netChartCtx = document.getElementById('netChart').getContext('2d');
-        const netChart = createTimeChart(netChartCtx, 'Network I/O (bytes/s)', ['Rx', 'Tx']);
+        const netChart = createTimeChart(netChartCtx, 'Network I/O (bytes/s)', ['Download', 'Upload']);
+
+        const netSpeedChartCtx = document.getElementById('netSpeedChart').getContext('2d');
+        const netSpeedChart = createTimeChart(netSpeedChartCtx, 'Network Speed (Mbps)', ['Download Speed', 'Upload Speed']);
 
         const diskIoChartCtx = document.getElementById('diskIoChart').getContext('2d');
         const diskIoChart = createTimeChart(diskIoChartCtx, 'Disk I/O (bytes/s)', ['Read', 'Write']);
@@ -634,11 +640,12 @@
                 // Support windows or node exporter names
                 const memTotalBytes = metrics['windows_memory_physical_total_bytes'] ?? metrics['windows_cs_physical_memory_bytes'] ?? metrics['node_memory_MemTotal_bytes'];
                 const memFreeBytes = metrics['windows_memory_available_bytes'] ?? metrics['windows_memory_physical_free_bytes'] ?? metrics['windows_os_physical_memory_free_bytes'] ?? metrics['node_memory_MemAvailable_bytes'];
-                let memUsedGB = null, memFreeGB = null, memUsedPct = null;
+                let memUsedGB = null, memFreeGB = null, memTotalGB = null, memUsedPct = null;
                 if (memTotalBytes !== undefined && memFreeBytes !== undefined) {
                     const memUsedBytes = memTotalBytes - memFreeBytes;
                     memUsedGB = bytesToGB(memUsedBytes);
                     memFreeGB = bytesToGB(memFreeBytes);
+                    memTotalGB = bytesToGB(memTotalBytes);
                     updateDoughnut(memoryChart, [memUsedGB, memFreeGB]);
                     memUsedPct = (memUsedBytes / memTotalBytes) * 100;
                 } else {
@@ -650,11 +657,12 @@
                 // Robust disk volume match for C:
                 const diskTotalBytes = sumBySuffix(rows, ['logical_disk_size_bytes', 'filesystem_size_bytes'], labels => labels && (labels.volume === 'C:' || labels.mountpoint === 'C:'));
                 const diskFreeBytes = sumBySuffix(rows, ['logical_disk_free_bytes', 'filesystem_free_bytes'], labels => labels && (labels.volume === 'C:' || labels.mountpoint === 'C:'));
-                let diskUsedGB = null, diskFreeGB = null, diskUsedPct = null;
+                let diskUsedGB = null, diskFreeGB = null, diskTotalGB = null, diskUsedPct = null;
                 if (diskTotalBytes !== undefined && diskFreeBytes !== undefined) {
                     const diskUsedBytes = diskTotalBytes - diskFreeBytes;
                     diskUsedGB = bytesToGB(diskUsedBytes);
                     diskFreeGB = bytesToGB(diskFreeBytes);
+                    diskTotalGB = bytesToGB(diskTotalBytes);
                     updateDoughnut(diskChart, [diskUsedGB, diskFreeGB]);
                     diskUsedPct = (diskUsedBytes / diskTotalBytes) * 100;
                 } else {
@@ -665,8 +673,8 @@
                 // KPIs and status
                 const cpuUtil = cpuIdlePct != null ? (100 - cpuIdlePct) : null;
                 if (cpuUtil != null) updateKpi('cpu', cpuUtil);
-                if (memUsedGB != null && memUsedPct != null) updateKpi('mem', memUsedPct, memUsedGB);
-                if (diskUsedGB != null && diskUsedPct != null) updateKpi('disk', diskUsedPct, diskUsedGB);
+                if (memUsedGB != null && memUsedPct != null) updateKpi('mem', memUsedPct, memUsedGB, memTotalGB);
+                if (diskUsedGB != null && diskUsedPct != null) updateKpi('disk', diskUsedPct, diskUsedGB, diskTotalGB);
                 samplesCollected += 1; document.getElementById('samples-kpi').innerText = String(samplesCollected);
                 updateUptime();
                 updateOverallStatus(cpuUtil, memUsedPct, diskUsedPct);
@@ -682,7 +690,7 @@
                 // Populate NIC select once
                 populateNics(rows);
 
-                // Network I/O rates for selected NIC (bytes/sec)
+                // Network I/O rates for selected NIC (bytes/sec) and Mbps
                 updateNetworkIo(rows, now);
 
                 // Disk I/O rates for C: (bytes/sec)
@@ -736,25 +744,29 @@
             return (bytes / (1024 ** 3)); // return number; format when displaying
         }
 
-        function updateKpi(kind, pct, valueGb) {
+        function updateKpi(kind, pct, valueGb, totalGb) {
             const pctRounded = Math.max(0, Math.min(100, Number(pct.toFixed ? pct.toFixed(1) : pct)));
             if (kind === 'cpu') {
                 document.getElementById('cpu-kpi').innerText = `${pctRounded.toFixed(1)}%`;
                 setProgress('cpu-progress', pctRounded);
                 alertIfExceeded('CPU', pctRounded, thresholds.cpu);
-                updateSpark('cpu', pctRounded);
+                // sparkline removed
             }
             if (kind === 'mem' && valueGb != null) {
-                document.getElementById('mem-kpi').innerText = `${(valueGb.toFixed ? valueGb.toFixed(2) : valueGb)} GB`;
+                const usedStr = (valueGb.toFixed ? valueGb.toFixed(2) : valueGb);
+                const totalStr = (totalGb != null && totalGb.toFixed) ? totalGb.toFixed(2) : (totalGb ?? '');
+                document.getElementById('mem-kpi').innerText = totalGb != null ? `${usedStr} GB / ${totalStr} GB` : `${usedStr} GB`;
                 setProgress('mem-progress', pctRounded);
                 alertIfExceeded('Memory', pctRounded, thresholds.memory);
-                updateSpark('mem', pctRounded);
+                // sparkline removed
             }
             if (kind === 'disk' && valueGb != null) {
-                document.getElementById('disk-kpi').innerText = `${(valueGb.toFixed ? valueGb.toFixed(2) : valueGb)} GB`;
+                const usedStr = (valueGb.toFixed ? valueGb.toFixed(2) : valueGb);
+                const totalStr = (totalGb != null && totalGb.toFixed) ? totalGb.toFixed(2) : (totalGb ?? '');
+                document.getElementById('disk-kpi').innerText = totalGb != null ? `${usedStr} GB / ${totalStr} GB` : `${usedStr} GB`;
                 setProgress('disk-progress', pctRounded);
                 alertIfExceeded('Disk', pctRounded, thresholds.disk);
-                updateSpark('disk', pctRounded);
+                // sparkline removed
             }
         }
 
@@ -782,6 +794,21 @@
             const mm = Math.floor(secs / 60);
             const ss = secs % 60;
             document.getElementById('uptime-label').innerText = `Session: ${mm}m ${ss}s`;
+        }
+
+        function formatDuration(ms) {
+            if (!isFinite(ms) || ms < 0) return '—';
+            const totalSeconds = Math.floor(ms / 1000);
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const parts = [];
+            if (days) parts.push(`${days}d`);
+            if (hours || parts.length) parts.push(`${hours}h`);
+            if (minutes || parts.length) parts.push(`${minutes}m`);
+            parts.push(`${seconds}s`);
+            return parts.join(' ');
         }
 
         function updateOverallStatus(cpu, mem, disk) {
@@ -847,29 +874,7 @@
             list.prepend(li);
         }
 
-        // Sparklines
-        const sparkCharts = {
-            cpu: new Chart(document.getElementById('spark-cpu').getContext('2d'), sparkConfig('#ef4444')),
-            mem: new Chart(document.getElementById('spark-mem').getContext('2d'), sparkConfig('#06b6d4')),
-            disk: new Chart(document.getElementById('spark-disk').getContext('2d'), sparkConfig('#10b981'))
-        };
-
-        function sparkConfig(color) {
-            return {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, pointRadius: 0, tension: 0.3, borderWidth: 2 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-            };
-        }
-
-        function updateSpark(kind, value) {
-            const maxPoints = 50;
-            const chart = sparkCharts[kind];
-            chart.data.labels.push('');
-            chart.data.datasets[0].data.push(value);
-            while (chart.data.datasets[0].data.length > maxPoints) { chart.data.datasets[0].data.shift(); chart.data.labels.shift(); }
-            chart.update('none');
-        }
+        // Sparklines removed: KPIs now show numeric data only
 
         // Peak tracking
         const peaks = { cpu: { v: 0, t: null }, mem: { v: 0, t: null }, disk: { v: 0, t: null } };
@@ -888,7 +893,7 @@
         let lastSeenOnline = Date.now();
         function updateServerState(metricMap, rows) {
             // Last boot time - try multiple sources and provide fallback
-            const bootSeconds = metricMap['node_boot_time_seconds'] ?? metricMap['windows_os_system_up_time'] ?? metricMap['windows_os_boot_time'] ?? null;
+            const bootSeconds = metricMap['node_boot_time_seconds'] ?? metricMap['windows_os_system_up_time'] ?? metricMap['windows_os_boot_time'] ?? metricMap['windows_system_boot_time_timestamp'] ?? null;
             const bootEl = document.getElementById('last-boot');
             if (bootSeconds) {
                 try {
@@ -899,6 +904,24 @@
                 }
             } else {
                 bootEl.innerText = 'Not available';
+            }
+            // System uptime using windows_system_boot_time_timestamp if present
+            const uptimeEl = document.getElementById('system-uptime');
+            try {
+                let bootTs = metricMap['windows_system_boot_time_timestamp'];
+                if (!bootTs && bootSeconds) {
+                    // If we got bootSeconds but not the specific metric, convert if it looks like seconds
+                    bootTs = bootSeconds > 10_000 ? bootSeconds : (Date.now()/1000) - bootSeconds;
+                }
+                if (bootTs) {
+                    const bootMs = (bootTs > 10_000 ? bootTs * 1000 : bootTs);
+                    const diffMs = Date.now() - bootMs;
+                    uptimeEl.innerText = formatDuration(diffMs);
+                } else {
+                    uptimeEl.innerText = 'Not available';
+                }
+            } catch (e) {
+                uptimeEl.innerText = 'Not available';
             }
             
             // Last shutdown - try to get from event logs or provide info
@@ -1172,6 +1195,11 @@
                     const txRate = Math.max(0, (tx - prev.tx) / dt);
                     addData(netChart, 0, { x: now, y: Number(rxRate.toFixed(2)) });
                     addData(netChart, 1, { x: now, y: Number(txRate.toFixed(2)) });
+                    // Convert to Mbps (bytes/sec * 8 / 1e6)
+                    const rxMbps = (rxRate * 8) / 1e6;
+                    const txMbps = (txRate * 8) / 1e6;
+                    addData(netSpeedChart, 0, { x: now, y: Number(rxMbps.toFixed(2)) });
+                    addData(netSpeedChart, 1, { x: now, y: Number(txMbps.toFixed(2)) });
                 }
             }
         }
