@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+            font-family: 'Poppins', sans-serif;
+            color: #343a40;
+            margin: 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #dc3545;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .icon {
+            font-size: 5rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .redirect-message {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        #countdown {
+            font-weight: 600;
+            color: #dc3545;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <!-- Using Font Awesome for the icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <i class="fas fa-user-lock"></i>
+        </div>
+        <h1>Access Denied</h1>
+        <p>{{message}}</p>
+        <div class="redirect-message">
+            Redirecting to dashboard in <span id="countdown">5</span> seconds...
+        </div>
+        <div class="actions">
+            <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+            <button onclick="window.history.back()" class="btn btn-secondary">Go Back</button>
+        </div>
+    </div>
+
+    <script>
+        let countdown = 5;
+        const timer = setInterval(() => {
+            countdown--;
+            document.getElementById('countdown').textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(timer);
+                window.location.href = '/dashboard';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLE Tech University - Server Monitoring Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Section with KLE Tech Image */
+        .header-section {
+            background-image: url('/images/IMG_0167.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 300px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .header-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .header-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .header-content p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            padding: 15px 0;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-brand h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .nav-menu a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Main Dashboard Content */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        /* Statistics Cards */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc3545, #ff8c00, #28a745);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .search-btn {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+        }
+
+        .no-servers-message {
+            grid-column: 1 / -1; /* Span all columns */
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1rem;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        /* Server Grid */
+        .servers-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .server-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .server-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .server-card:hover {
+            transform: translateY(-8px);
+            border-color: #28a745;
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.2);
+        }
+
+        .server-header {
+            display: flex;
+            font-weight: 700;
+            font-size: 1.2rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* status dot positioned at top-right of each server card */
+        .server-card .server-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545; /* default red (offline) */
+            box-shadow: 0 6px 12px rgba(220,53,69,0.14);
+            transition: background .25s ease, box-shadow .25s ease;
+        }
+
+        .server-card .server-status.online {
+            background: #28a745;
+            box-shadow: 0 6px 12px rgba(40,167,69,0.18);
+        }
+
+        .server-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .server-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .server-actions form {
+            display: contents;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .footer-text {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        /* Toast / popup (top-right) */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 3000;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            max-width: 420px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(17,24,39,0.9), rgba(31,41,55,0.85));
+            box-shadow: 0 10px 30px rgba(2,6,23,0.45), 0 2px 6px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.04);
+            transform: translateX(18px) scale(.98);
+            opacity: 0;
+            animation: toast-in .36s cubic-bezier(.2,.9,.3,1) forwards;
+            overflow: hidden;
+            backdrop-filter: blur(6px);
+        }
+
+        .toast .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.04);
+            flex: 0 0 40px;
+            font-size: 1.1rem;
+        }
+
+        .toast .message {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.2;
+        }
+
+        .toast.success { border-left: 4px solid #28a745; }
+        .toast.info    { border-left: 4px solid #0d6efd; }
+        .toast.warn    { border-left: 4px solid #ffc107; }
+
+        .toast .close {
+            margin-left: 8px;
+            cursor: pointer;
+            opacity: 0.8;
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        @keyframes toast-in {
+            from { transform: translateX(18px) scale(.98); opacity: 0; }
+            to   { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes toast-out {
+            from { transform: translateX(0) scale(1); opacity: 1; }
+            to   { transform: translateX(18px) scale(.98); opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .header-content p {
+                font-size: 1.1rem;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-menu {
+                gap: 15px;
+            }
+
+            .dashboard-container {
+                padding: 30px 20px;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .server-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .server-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content h1 {
+                font-size: 2rem;
+            }
+
+            .header-content p {
+                font-size: 1rem;
+            }
+
+            .dashboard-container {
+                padding: 20px 15px;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 25px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section with KLE Tech Image -->
+    <div class="header-section">
+        <div class="header-overlay">
+            <div class="header-content">
+                <h1>Server Monitoring Dashboard</h1>
+                <p>KLE Technological University - CAIR Lab Infrastructure Management</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <i class="fas fa-server"></i>
+                <h2>KLE Tech Monitoring</h2>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                <li><a href="#" onclick="promptForCodeAndRedirect('/server/add')"><i class="fas fa-plus-circle"></i> Add Server</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Statistics Cards -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="stat-number">{{stats.totalServers}}</div>
+                <div class="stat-label">Total Servers</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">{{stats.onlineServers}}</div>
+                <div class="stat-label">Online Servers</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stat-number">{{stats.offlineServers}}</div>
+                <div class="stat-label">Offline / Maintenance</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number">{{stats.activeTeams}}</div>
+                <div class="stat-label">Active Teams</div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search servers, teams, or domains...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Servers Section -->
+        <div class="servers-section">
+            <div class="section-header">
+                <h2 class="section-title">Server Infrastructure</h2>
+            </div>
+            
+            <div class="server-grid">
+                {{#each servers}}
+                <div class="server-card" data-ip="{{this.serverIp}}" data-id="{{this._id}}">
+                    <div class="server-header">
+                        <div class="server-name">{{this.model}}</div>
+                    </div>
+
+                    {{!-- render a single status dot; server-side initial colour from DB status --}}
+                    <span class="server-status {{#if (eq this.status "on")}}online{{/if}}" title="{{this.status}}">
+                    </span>
+
+                    <div class="server-info">
+                        <div class="info-item">
+                            <div class="info-label">Server Number</div>
+                            <div class="info-value">{{this.serverNumber}}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Server IP</div>
+                            <div class="info-value">{{this.serverIp}}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Team Allocated</div>
+                            <div class="info-value">{{this.team}}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">RAM</div>
+                            <div class="info-value">{{this.ram}}</div>
+                        </div>
+                    </div>
+                    <div class="server-actions">
+                        <a href="#" class="action-btn btn-primary" data-action="monitor">Monitor</a>
+                        <a href="#" class="action-btn btn-success" data-action="manage" data-url="/server/edit/{{this._id}}">Manage</a>
+                        <form action="/server/delete/{{this._id}}" method="POST" onsubmit="return handleDelete(this);">
+                            <button type="submit" class="action-btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {{else}}
+                <p class="no-servers-message">No servers have been added yet. Click "Add Server" in the navigation bar to get started.</p>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2025 KLE Technological University - CAIR Lab. 
+            </p>
+        </div>
+    </footer>
+
+   <script>
+    function promptForCodeAndRedirect(url) {
+        const code = prompt('Please enter the security code to proceed:');
+        if (code !== null) { // Proceed if user clicks OK, even with an empty string
+            window.location.href = `${url}?code=${encodeURIComponent(code)}`;
+        }
+    }
+
+    function handleDelete(form) {
+        // Ask for confirmation first
+        if (!confirm('Are you sure you want to delete this server?')) {
+            return false;
+        }
+
+        // Then ask for the security code
+        const code = prompt('Please enter the security code to proceed:');
+        if (code !== null) { // Proceed if user clicks OK
+            // Add the security code as a hidden input to the form
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'code';
+            hiddenInput.value = code;
+            form.appendChild(hiddenInput);
+            return true; // Allow form submission
+        }
+        
+        // Do not submit form if prompt is cancelled
+        return false;
+    }
+
+    // Search functionality
+    document.querySelector('.search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const serverCards = document.querySelectorAll('.server-card');
+        
+        serverCards.forEach(card => {
+            const serverName = card.querySelector('.server-name').textContent.toLowerCase();
+            const serverInfo = card.querySelector('.server-info').textContent.toLowerCase();
+            
+            if (serverName.includes(searchTerm) || serverInfo.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Toast helper
+    function ensureToastContainer() {
+        let c = document.querySelector('.toast-container');
+        if (!c) {
+            c = document.createElement('div');
+            c.className = 'toast-container';
+            document.body.appendChild(c);
+        }
+        return c;
+    }
+
+    function showToast(message, type = 'info', timeout = 2000) {
+        const container = ensureToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="icon">${type === 'success' ? '<i class="fas fa-check-circle"></i>' : (type === 'warn' ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>')}</div>
+            <div class="message">${message}</div>
+            <div class="close" aria-hidden="true">&times;</div>
+        `;
+        container.prepend(toast);
+
+        // close on click
+        toast.querySelector('.close').addEventListener('click', () => removeToast(toast));
+
+        // auto remove after timeout
+        setTimeout(() => {
+            removeToast(toast);
+        }, timeout);
+
+        return toast;
+    }
+
+    function removeToast(toast) {
+        if (!toast) return;
+        toast.style.animation = 'toast-out .28s ease forwards';
+        setTimeout(() => {
+            toast.remove();
+        }, 280);
+    }
+
+    // Action button functionality (Monitor / Manage)
+    document.querySelectorAll('.action-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const action = (this.dataset.action || this.textContent || '').trim();
+            const serverName = this.closest('.server-card').querySelector('.server-name').textContent;
+            
+            if (action.toLowerCase() === 'monitor') {
+                event.preventDefault();
+
+                showToast(`Opening monitoring for ${serverName}...`, 'info', 1800);
+
+                setTimeout(() => {
+                    window.location.href = `/monitor/${encodeURIComponent(serverName)}`;
+                }, 2000);
+            } else if (action.toLowerCase() === 'manage') {
+                event.preventDefault();
+
+                // prefer explicit data-url if provided
+                const targetUrl = this.dataset.url || `/server/edit/${encodeURIComponent(this.closest('.server-card').querySelector('form')?.getAttribute('action')?.split('/').pop() || '')}`;
+
+                showToast(`Opening management for ${serverName}...`, 'success', 1800);
+
+                setTimeout(() => {
+                    // if the manage link requires a security code use the prompt helper
+                    if (targetUrl && targetUrl.includes('/server/edit')) {
+                        // preserve existing prompt behavior
+                        const code = prompt('Please enter the security code to proceed:');
+                        if (code !== null) {
+                            // redirect and attach code as query param
+                            window.location.href = `${targetUrl}?code=${encodeURIComponent(code)}`;
+                            return;
+                        } else {
+                            // cancelled by user — do nothing
+                            return;
+                        }
+                    }
+                    // fallback redirect
+                    window.location.href = targetUrl || '/dashboard';
+                }, 2000);
+            } else if (action === 'Restart') {
+                alert(`Initiating restart for ${serverName}`);
+            } else if (action === 'Diagnose') {
+                alert(`Starting diagnostic scan for ${serverName}`);
+            } else if (action === 'Schedule') {
+                alert(`Opening maintenance scheduler for ${serverName}`);
+            } else if (action === 'Details') {
+                alert(`Showing detailed information for ${serverName}`);
+            }
+        });
+    });
+
+    // Add some interactive effects
+    document.querySelectorAll('.server-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Statistics animation
+    function animateNumbers() {
+        const numbers = document.querySelectorAll('.stat-number');
+        numbers.forEach(number => {
+            const finalValue = parseInt(number.textContent);
+            let currentValue = 0;
+            const increment = finalValue / 20;
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    number.textContent = finalValue;
+                    clearInterval(timer);
+                } else {
+                    number.textContent = Math.floor(currentValue);
+                }
+            }, 50);
+        });
+    }
+
+    // Run animation when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(animateNumbers, 500);
+    });
+
+    /* helper: update status dots dynamically
+       - Primary: try /api/servers (expects JSON list or {servers: [...]}) returning status field from MongoDB.
+       - Fallback: /api/servers/metrics (infers online from metrics fetch success).
+    */
+    async function fetchServerStatuses() {
+        // attempt to get authoritative status from backend DB endpoint
+        const tryEndpoints = [
+            '/api/servers',              // recommended: should return array [{ _id, serverIp, status, ... }]
+            '/api/servers/status',       // alternative name if implemented
+            '/api/servers/metrics'       // fallback (infers online by ability to fetch metrics)
+        ];
+
+        for (const ep of tryEndpoints) {
+            try {
+                const res = await fetch(ep, { cache: 'no-store' });
+                if (!res.ok) continue;
+                const json = await res.json();
+
+                // normalize result into array of server objects
+                let list = [];
+                if (Array.isArray(json)) list = json;
+                else if (Array.isArray(json.servers)) list = json.servers;
+                else if (Array.isArray(json.results)) {
+                    // /api/servers/metrics format used earlier: results[].server + metrics
+                    list = json.results.map(r => {
+                        return {
+                            serverIp: r.server?.ip || r.server?.serverIp,
+                            status: r.metrics ? 'on' : 'off',
+                            _id: (r.server && r.server._id) || null
+                        };
+                    });
+                }
+
+                // TODO: update your DOM status indicators here using `list`
+                return list;
+            } catch (e) {
+                console.warn(`fetch failed for ${ep}`, e);
+                continue;
+            }
+        }
+
+        return []; // if all fail
+    }
+</script>

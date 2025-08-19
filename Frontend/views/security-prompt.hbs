@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f4; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        h1 { margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; }
+        input[type="password"] { width: 100%; padding: 0.5rem; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+        button { padding: 0.7rem 1.5rem; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        button:hover { background-color: #0056b3; }
+        .error { color: red; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{title}}</h1>
+        <p>Please enter the security code to proceed.</p>
+        {{#if error}}
+            <p class="error">{{error}}</p>
+        {{/if}}
+        <form method="POST" action="{{originalUrl}}">
+            <div class="form-group">
+                <label for="securityCode">Security Code</label>
+                <input type="password" id="securityCode" name="securityCode" required autofocus>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
