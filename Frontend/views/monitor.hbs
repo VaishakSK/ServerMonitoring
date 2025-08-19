@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring - {{serverName}}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        h1 { text-align: left; color: var(--text); }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; max-width: 1600px; margin: 20px auto; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+        .error-message { text-align: center; color: #dc3545; font-size: 1.2rem; padding: 40px; background: #fff3f3; border-radius: 8px; border: 1px solid #dc3545; }
+
+        /* Enhanced Error Handling */
+        .error-container { max-width: 800px; margin: 40px auto; text-align: center; }
+        .error-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 32px; position: relative; overflow: hidden; }
+        .error-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981); }
+        .error-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.8; }
+        .error-title { font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .error-subtitle { font-size: 1rem; color: var(--muted); margin-bottom: 24px; }
+        .error-details { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: left; }
+        .error-details h4 { color: #dc2626; margin: 0 0 12px; font-size: 1rem; }
+        .error-details ul { margin: 0; padding-left: 20px; color: var(--text); }
+        .error-details li { margin: 8px 0; font-size: 0.95rem; }
+        .error-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+        .error-btn { padding: 12px 24px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+        .error-btn.primary { background: var(--primary); color: white; }
+        .error-btn.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .error-btn.secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+        .error-btn.secondary:hover { background: var(--border); }
+        .connection-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; }
+        .connection-status.offline { background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .connection-status.connecting { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
+        .status-dot.offline { background: #dc2626; }
+        .status-dot.connecting { background: #f59e0b; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Enhanced theme and layout */
+        :root {
+            /* Innovative light palette: mint → sky gradient, soft mint cards */
+            --bg: linear-gradient(180deg, #e7faf6 0%, #eef5ff 100%);
+            --card: #edf7f5;
+            --text: #0f172a;
+            --muted: #475569;
+            --shadow: 0 6px 24px rgba(0,0,0,0.08);
+            --primary: #06b6d4; /* cyan */
+            --success: #10b981; /* emerald */
+            --warning: #f59e0b; /* amber */
+            --danger: #ef4444;  /* red */
+            --border: #cfe7e1;
+        }
+        body { background: var(--bg); color: var(--text); }
+        body.dark {
+            --bg: #0b1220;
+            --card: #0f172a;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --shadow: 0 8px 30px rgba(0,0,0,0.45);
+            --border: #1f2937;
+        }
+
+        .topbar { max-width: 1600px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .sub { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+        .status-pill { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--card); color: var(--muted); }
+        .status-pill.good { color: var(--success); border-color: rgba(22,163,74,0.35); }
+        .status-pill.warn { color: var(--warning); border-color: rgba(245,158,11,0.35); }
+        .status-pill.crit { color: var(--danger); border-color: rgba(220,38,38,0.35); }
+        .status-pill.offline { color: var(--danger); border-color: rgba(220,38,38,0.35); background: rgba(220,38,38,0.1); }
+        .status-pill.connecting { color: var(--warning); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.1); }
+
+        .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .control { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
+        .control label { font-size: 12px; color: var(--muted); }
+        .control select, .control button { border: none; background: transparent; color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none; }
+        .control select option { color: var(--text); background: var(--card); }
+        .btn { cursor: pointer; padding: 8px 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); }
+        .btn:hover { filter: brightness(1.03); }
+
+        .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; max-width: 1600px; margin: 10px auto 20px; align-items: start; }
+        .kpi-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; min-height: 110px; }
+        .kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+        .kpi-value { font-weight: 700; font-size: 1.4rem; }
+        .spark { width: 100%; height: 32px; max-height: 32px; margin-top: 8px; display: block; }
+        .progress { height: 8px; background: rgba(148,163,184,0.25); border-radius: 999px; overflow: hidden; margin-top: 10px; flex: 0 0 auto; }
+        .progress > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--primary), #22c55e, #06b6d4); background-size: 200% 100%; animation: progressGlow 4s linear infinite; transition: width 0.3s ease; }
+        .progress.warn > span { background: var(--warning); }
+        .progress.crit > span { background: var(--danger); }
+        @keyframes progressGlow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+        .charts-grid { margin: 10px auto 20px; }
+        .chart-container { background: var(--card); border: 1px solid var(--border); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .chart-container:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+        .chart-container canvas { height: 320px !important; max-height: 320px; }
+        .chart-container.cpu canvas { height: 420px !important; max-height: 420px; }
+        @media (min-width: 1100px) { .chart-container.cpu { grid-column: span 2; } }
+
+        .insights { max-width: 1600px; margin: 0 auto 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+        .insight-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); }
+        .insight-title { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+        .insight-value { font-weight: 600; font-size: 1rem; }
+
+        .panel-grid { max-width: 1600px; margin: 0 auto 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 12px; }
+        .panel h3 { margin: 4px 0 10px; font-size: 14px; color: var(--muted); }
+        .list { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow: auto; }
+        .list li { font-size: 13px; padding: 6px 4px; border-bottom: 1px dashed var(--border); }
+
+        .toast { position: fixed; right: 20px; bottom: 20px; background: var(--card); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 12px 16px; border-radius: 10px; opacity: 0; transform: translateY(8px); transition: all 0.25s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* High contrast option */
+        body.contrast {
+            --card: #e2e8f0;
+            --text: #0b0f19;
+            --border: #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="brand">
+            <div>
+                <h1 id="server-name-header">Live Monitoring: {{serverName}}</h1>
+                <div class="sub">IP: <span id="server-ip-label">{{serverIp}}</span></div>
+            </div>
+            <span id="overall-status" class="status-pill">Calculating…</span>
+        </div>
+        <div class="controls">
+            <div class="control">
+                <label for="theme-toggle">Theme</label>
+                <button id="theme-toggle" class="btn" title="Toggle Theme">Toggle</button>
+            </div>
+            <div class="control">
+                <label for="live-toggle">Live</label>
+                <button id="live-toggle" class="btn" title="Follow live">On</button>
+            </div>
+            <div class="control">
+                <label for="per-core-toggle">Per-core</label>
+                <button id="per-core-toggle" class="btn" title="Expand per-core">Off</button>
+            </div>
+            <div class="control">
+                <label for="nic-select">NIC</label>
+                <select id="nic-select"><option value="">Auto</option></select>
+            </div>
+            <div class="control">
+                <label for="range-select">Window</label>
+                <select id="range-select">
+                    <option value="60000">1 min</option>
+                    <option value="300000" selected>5 min</option>
+                    <option value="900000">15 min</option>
+                    <option value="3600000">1 hour</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="refresh-select">Refresh</label>
+                <select id="refresh-select">
+                    <option value="2000">2s</option>
+                    <option value="5000" selected>5s</option>
+                    <option value="10000">10s</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="palette-select">Palette</label>
+                <select id="palette-select">
+                    <option value="default" selected>Default</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="ocean">Ocean</option>
+                    <option value="forest">Forest</option>
+                </select>
+            </div>
+            <div class="control">
+                <label for="contrast-toggle">Contrast</label>
+                <button id="contrast-toggle" class="btn" title="High contrast">Off</button>
+            </div>
+            <button id="pause-btn" class="btn">Pause</button>
+            <button id="reset-zoom-btn" class="btn">Reset Zoom</button>
+            <button id="export-png-btn" class="btn">Export PNG</button>
+            <button id="export-csv-btn" class="btn">Export CSV</button>
+            <button id="mute-alerts-btn" class="btn" title="Mute alerts">Mute Alerts</button>
+        </div>
+    </div>
+
+    <div class="kpis-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">CPU Utilization</div>
+            <div class="kpi-value" id="cpu-kpi">0%</div>
+            <div class="progress" id="cpu-progress"><span></span></div>
+            <canvas id="spark-cpu" class="spark"></canvas>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Memory Used</div>
+            <div class="kpi-value" id="mem-kpi">0 GB</div>
+            <div class="progress" id="mem-progress"><span></span></div>
+            <canvas id="spark-mem" class="spark"></canvas>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Disk Used (C:)</div>
+            <div class="kpi-value" id="disk-kpi">0 GB</div>
+            <div class="progress" id="disk-progress"><span></span></div>
+            <canvas id="spark-disk" class="spark"></canvas>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">Samples Collected</div>
+            <div class="kpi-value" id="samples-kpi">0</div>
+            <div class="sub" id="uptime-label">Session running…</div>
+        </div>
+    </div>
+
+    <div class="insights">
+        <div class="insight-card">
+            <div class="insight-title">Peak CPU</div>
+            <div class="insight-value" id="peak-cpu">—</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Peak Memory</div>
+            <div class="insight-value" id="peak-mem">—</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Peak Disk (C:)</div>
+            <div class="insight-value" id="peak-disk">—</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Peak CPU Today</div>
+            <div class="insight-value" id="peak-cpu-today">—</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Server State</div>
+            <div class="insight-value" id="server-state">Unknown</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Last Boot Time</div>
+            <div class="insight-value" id="last-boot">—</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Last Shutdown</div>
+            <div class="insight-value" id="last-shutdown">Unavailable from metrics</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-title">Last Offline (Session)</div>
+            <div class="insight-value" id="last-offline">—</div>
+        </div>
+    </div>
+    <div id="charts-container" class="charts-grid">
+        <div class="chart-container cpu">
+            <canvas id="cpuChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="memoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="diskChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="netChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="diskIoChart"></canvas>
+        </div>
+    </div>
+    <div id="error-container" style="display: none;">
+        <div class="error-container">
+            <div class="error-card">
+                <div class="connection-status offline">
+                    <div class="status-dot offline"></div>
+                    Connection Lost
+                </div>
+                
+                <div class="error-icon">🔌</div>
+                <div class="error-title">Server Connection Unavailable</div>
+                <div class="error-subtitle">Unable to establish connection to {{serverName}} ({{serverIp}}:9182)</div>
+                
+                <div class="error-details">
+                    <h4>🔍 Troubleshooting Steps</h4>
+                    <ul>
+                        <li><strong>Windows Exporter Service:</strong> Verify the service is running on the target server</li>
+                        <li><strong>Firewall Configuration:</strong> Ensure port 9182 is accessible from this network</li>
+                        <li><strong>Network Connectivity:</strong> Check if the server is reachable via ping or telnet</li>
+                        <li><strong>Service Status:</strong> Confirm Windows Exporter is listening on the correct interface</li>
+                    </ul>
+                </div>
+                
+                <div class="error-actions">
+                    <button class="error-btn primary" id="retry-connection">🔄 Retry Connection</button>
+                    <button class="error-btn secondary" id="show-diagnostics">📊 Show Diagnostics</button>
+                    <button class="error-btn secondary" id="manual-refresh">🔄 Manual Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div class="panel-grid">
+        <div class="panel">
+            <h3>Alerts</h3>
+            <ul id="alerts-list" class="list"></ul>
+        </div>
+        <div class="panel">
+            <h3>Timeline</h3>
+            <ul id="timeline-list" class="list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Register plugins
+        Chart.register(ChartDataLabels);
+        if (typeof ChartZoom !== 'undefined') { Chart.register(ChartZoom); }
+
+        const serverIp = '{{serverIp}}';
+        const serverName = '{{serverName}}';
+        const sessionStartedAt = Date.now();
+
+        // Thresholds & state
+        const thresholds = { cpu: 85, memory: 90, disk: 90 };
+        let refreshMs = 5000;
+        let windowMs = 300000; // 5 min
+        let timerId = null;
+        let paused = false;
+        let samplesCollected = 0;
+        const sampleHistory = [];
+        let isUserZoomed = false;
+        let liveFollow = true;
+        const sparkHistory = { cpu: [], mem: [], disk: [] };
+        let perCoreMode = false;
+        let muteAlerts = false;
+        let lastCpuByCore = new Map(); // core -> { user, system, idle, total }
+        let knownNics = new Set();
+        let selectedNic = '';
+        const prevNet = new Map(); // nic -> { rx, tx, ts }
+        const prevDisk = new Map(); // vol -> { read, write, ts }
+
+        // --- Chart Setup ---
+        const cpuChartCtx = document.getElementById('cpuChart').getContext('2d');
+        const cpuChart = createTimeChart(cpuChartCtx, 'CPU Usage (%)', ['User', 'System', 'Idle', 'Overall']);
+
+        const memoryChartCtx = document.getElementById('memoryChart').getContext('2d');
+        const memoryChart = createDoughnutChart(memoryChartCtx, 'Memory Usage (GB)', ['Used', 'Free']);
+        
+        const diskChartCtx = document.getElementById('diskChart').getContext('2d');
+        const diskChart = createDoughnutChart(diskChartCtx, 'Disk Usage (C:) (GB)', ['Used', 'Free']);
+
+        const netChartCtx = document.getElementById('netChart').getContext('2d');
+        const netChart = createTimeChart(netChartCtx, 'Network I/O (bytes/s)', ['Rx', 'Tx']);
+
+        const diskIoChartCtx = document.getElementById('diskIoChart').getContext('2d');
+        const diskIoChart = createTimeChart(diskIoChartCtx, 'Disk I/O (bytes/s)', ['Read', 'Write']);
+
+        function currentPalette() {
+            const mode = (document.getElementById('palette-select')?.value) || 'default';
+            if (mode === 'sunset') return ['#f97316', '#ef4444', '#eab308'];
+            if (mode === 'ocean') return ['#0ea5e9', '#22d3ee', '#6366f1'];
+            if (mode === 'forest') return ['#16a34a', '#22c55e', '#84cc16'];
+            // brighter default light palette
+            return ['#0070f3', '#ff0080', '#00bfa5'];
+        }
+
+        function createTimeChart(ctx, title, labels) {
+            const palette = currentPalette();
+            const gradients = palette.map(color => createGradient(ctx, color));
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: labels.map((label, i) => ({
+                        label: label,
+                        data: [],
+                        fill: label === 'Overall' ? false : true,
+                        tension: 0.3,
+                        pointRadius: 2,
+                        borderColor: label === 'Overall' ? '#e11d48' : palette[i],
+                        backgroundColor: label === 'Overall' ? 'transparent' : gradients[i],
+                        borderDash: label === 'Overall' ? [6,4] : undefined,
+                        borderWidth: label === 'Overall' ? 3 : 2
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        title: { display: true, text: title, font: { size: 16 } },
+                        datalabels: {
+                            display: false
+                        },
+                        legend: { display: true },
+                        zoom: {
+                            limits: { x: { min: 'original', max: 'original' }, y: { min: 0, max: 100 } },
+                            pan: { enabled: true, mode: 'x' },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' },
+                            onZoom: () => { isUserZoomed = true; },
+                            onPan: () => { isUserZoomed = true; }
+                        }
+                    },
+                    scales: {
+                        x: { type: 'time', time: { unit: 'second', displayFormats: { second: 'HH:mm:ss' } }, title: { display: true, text: 'Time' } },
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Usage (%)' } }
+                    }
+                }
+            });
+        }
+
+        function createGradient(ctx, color) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+            gradient.addColorStop(0, hexToRgba(color, 0.35));
+            gradient.addColorStop(1, hexToRgba(color, 0));
+            return gradient;
+        }
+
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function drawCenterText(chart, text) {
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return;
+            ctx.save();
+            ctx.font = '600 16px Poppins, sans-serif';
+            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text') || '#111827';
+            const w = ctx.measureText(text).width;
+            ctx.fillText(text, chartArea.left + (chartArea.width - w) / 2, chartArea.top + chartArea.height / 2);
+            ctx.restore();
+        }
+
+        function createDoughnutChart(ctx, title, labels) {
+             return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: [], // Start with empty data
+                        backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(75, 192, 192, 0.7)'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        title: { display: true, text: title, font: { size: 16 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = parseFloat(context.raw).toFixed(2);
+                                    return `${label}: ${value} GB`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+                                if (sum === 0) return '0%';
+                                const percentage = (value * 100 / sum).toFixed(1) + '%';
+                                return percentage;
+                            },
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 14
+                            },
+                            // Only show label if percentage is significant
+                            display: function(context) {
+                                return context.dataset.data[context.dataIndex] > 0;
+                            }
+                        },
+                        // draw value in center
+                        afterDraw: (chart) => {
+                            const ds = chart.data.datasets?.[0]?.data || [];
+                            if (ds.length >= 2) {
+                                const used = parseFloat(ds[0]) || 0;
+                                const free = parseFloat(ds[1]) || 0;
+                                const total = used + free;
+                                const pct = total > 0 ? (used * 100 / total).toFixed(1) : '0.0';
+                                drawCenterText(chart, `${pct}%`);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Data Fetching and Parsing ---
+        // Legacy map parser (kept for reference)
+        function parsePrometheusText(text) {
+            const metrics = {};
+            text.split('\n').forEach(line => {
+                if (line.startsWith('#') || line.trim() === '') return;
+                const parts = line.trim().split(/\s+/);
+                const valueStr = parts[parts.length - 1];
+                const value = parseFloat(valueStr);
+                const key = parts.slice(0, parts.length - 1).join(' ');
+                metrics[key] = value;
+            });
+            return metrics;
+        }
+
+        // Robust row parser with label awareness
+        function parsePrometheusRows(text) {
+            const rows = [];
+            const lineRegex = /^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{([^}]*)\})?\s+([-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)(?:\s+[-+]?[0-9]+)?$/;
+            text.split('\n').forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#')) return;
+                const match = trimmed.match(lineRegex);
+                if (!match) return;
+                const name = match[1];
+                const labelsStr = match[3] || '';
+                const value = parseFloat(match[4]);
+                const labels = {};
+                // split by commas not inside quotes (handles core="0,0")
+                let buf = '';
+                let inQuotes = false;
+                const parts = [];
+                for (let i = 0; i < labelsStr.length; i++) {
+                    const ch = labelsStr[i];
+                    if (ch === '"') { inQuotes = !inQuotes; buf += ch; continue; }
+                    if (ch === ',' && !inQuotes) { parts.push(buf); buf = ''; continue; }
+                    buf += ch;
+                }
+                if (buf) parts.push(buf);
+                parts.forEach(pair => {
+                    const m = pair.match(/^([^=]+)="([\s\S]*)"$/);
+                    if (m) labels[m[1]] = m[2];
+                });
+                rows.push({ name, labels, value });
+            });
+            return rows;
+        }
+
+        function sumCpuMode(rows, mode, perCore = false) {
+            // Suffix match 'cpu_time_total'; Windows exporter label 'core' has values like "0,0"
+            const filtered = rows.filter(r => r.name.endsWith('cpu_time_total') && r.labels && r.labels.mode === mode);
+            if (!perCore) return filtered.reduce((acc, r) => acc + r.value, 0);
+            // group by core
+            const map = new Map();
+            filtered.forEach(r => { const k = r.labels.core || 'all'; map.set(k, (map.get(k) || 0) + r.value); });
+            return map; // Map of core -> sum
+        }
+
+        function sumBySuffix(rows, suffixes, labelMatcher) {
+            const set = new Set(suffixes);
+            return rows
+                .filter(r => Array.from(set).some(s => r.name.endsWith(s)) && (!labelMatcher || labelMatcher(r.labels)))
+                .reduce((acc, r) => acc + r.value, 0);
+        }
+
+        let lastCpuMetrics = {};
+
+        async function fetchAndDrawMetrics() {
+            try {
+                const response = await fetch(`/api/metrics?ip=${encodeURIComponent(serverIp)}`);
+                if (!response.ok) {
+                    // Use the more detailed error handling
+                    const errorData = await response.json().catch(() => ({ details: `Failed to fetch metrics: ${response.statusText}` }));
+                    throw new Error(errorData.details || `An unknown error occurred while fetching metrics.`);
+                }
+
+                document.getElementById('charts-container').style.display = 'grid';
+                document.getElementById('error-container').style.display = 'none';
+
+                const metricsText = await response.text();
+                const metrics = parsePrometheusText(metricsText);
+                const rows = parsePrometheusRows(metricsText);
+                const now = Date.now();
+                // Keep live window visible unless user zoomed/panned
+                if (!isUserZoomed && liveFollow) {
+                    cpuChart.options.scales.x.min = now - windowMs;
+                    cpuChart.options.scales.x.max = now;
+                }
+
+                // Update CPU Chart (calculating usage percentage over time)
+                const cpuModes = ['user', 'system', 'idle'];
+                let cpuUserPct = null, cpuSystemPct = null, cpuIdlePct = null;
+                if (!perCoreMode) {
+                const currentCpuMetrics = {};
+                let totalTimeDelta = 0;
+                cpuModes.forEach(mode => {
+                        const total = sumCpuMode(rows, mode);
+                        currentCpuMetrics[mode] = total || 0;
+                        if (lastCpuMetrics[mode]) totalTimeDelta += (currentCpuMetrics[mode] - lastCpuMetrics[mode]);
+                    });
+                if (totalTimeDelta > 0) {
+                    cpuModes.forEach((mode, index) => {
+                        const delta = (currentCpuMetrics[mode] - (lastCpuMetrics[mode] || 0));
+                        const percentage = (delta / totalTimeDelta) * 100;
+                            addData(cpuChart, index, { x: now, y: Number(percentage.toFixed(2)) });
+                            if (mode === 'user') cpuUserPct = percentage;
+                            if (mode === 'system') cpuSystemPct = percentage;
+                            if (mode === 'idle') cpuIdlePct = percentage;
+                        });
+                        if (cpuIdlePct != null) {
+                            const overall = 100 - cpuIdlePct;
+                            const overallDatasetIndex = cpuChart.data.datasets.findIndex(d => d.label === 'Overall');
+                            if (overallDatasetIndex !== -1) addData(cpuChart, overallDatasetIndex, { x: now, y: Number(overall.toFixed(2)) });
+                        }
+                    }
+                    lastCpuMetrics = currentCpuMetrics;
+                } else {
+                    // Per-core overall utilization lines
+                    // Build current per-core totals
+                    const perCoreUser = sumCpuMode(rows, 'user', true); // Map
+                    const perCoreSystem = sumCpuMode(rows, 'system', true);
+                    const perCoreIdle = sumCpuMode(rows, 'idle', true);
+                    const cores = Array.from(new Set([...perCoreIdle.keys(), ...perCoreUser.keys(), ...perCoreSystem.keys()]));
+                    ensurePerCoreDatasets(cores);
+                    cores.forEach((core, idx) => {
+                        const last = lastCpuByCore.get(core) || { user: 0, system: 0, idle: 0 };
+                        const cur = {
+                            user: perCoreUser.get(core) || 0,
+                            system: perCoreSystem.get(core) || 0,
+                            idle: perCoreIdle.get(core) || 0
+                        };
+                        const deltaUser = cur.user - last.user;
+                        const deltaSystem = cur.system - last.system;
+                        const deltaIdle = cur.idle - last.idle;
+                        const total = deltaUser + deltaSystem + deltaIdle;
+                        if (total > 0) {
+                            const overall = ((deltaUser + deltaSystem) * 100) / total;
+                            addData(cpuChart, idx, { x: now, y: Number(overall.toFixed(2)) });
+                        }
+                        lastCpuByCore.set(core, cur);
+                    });
+                }
+
+                // Update Memory Chart
+                // Support windows or node exporter names
+                const memTotalBytes = metrics['windows_memory_physical_total_bytes'] ?? metrics['windows_cs_physical_memory_bytes'] ?? metrics['node_memory_MemTotal_bytes'];
+                const memFreeBytes = metrics['windows_memory_available_bytes'] ?? metrics['windows_memory_physical_free_bytes'] ?? metrics['windows_os_physical_memory_free_bytes'] ?? metrics['node_memory_MemAvailable_bytes'];
+                let memUsedGB = null, memFreeGB = null, memUsedPct = null;
+                if (memTotalBytes !== undefined && memFreeBytes !== undefined) {
+                    const memUsedBytes = memTotalBytes - memFreeBytes;
+                    memUsedGB = bytesToGB(memUsedBytes);
+                    memFreeGB = bytesToGB(memFreeBytes);
+                    updateDoughnut(memoryChart, [memUsedGB, memFreeGB]);
+                    memUsedPct = (memUsedBytes / memTotalBytes) * 100;
+                } else {
+                    console.warn('Memory metrics not found, skipping chart update.');
+                    updateDoughnut(memoryChart, [0, 0]); // Clear chart or show no data
+                }
+
+                // Update Disk Chart (for C: drive)
+                // Robust disk volume match for C:
+                const diskTotalBytes = sumBySuffix(rows, ['logical_disk_size_bytes', 'filesystem_size_bytes'], labels => labels && (labels.volume === 'C:' || labels.mountpoint === 'C:'));
+                const diskFreeBytes = sumBySuffix(rows, ['logical_disk_free_bytes', 'filesystem_free_bytes'], labels => labels && (labels.volume === 'C:' || labels.mountpoint === 'C:'));
+                let diskUsedGB = null, diskFreeGB = null, diskUsedPct = null;
+                if (diskTotalBytes !== undefined && diskFreeBytes !== undefined) {
+                    const diskUsedBytes = diskTotalBytes - diskFreeBytes;
+                    diskUsedGB = bytesToGB(diskUsedBytes);
+                    diskFreeGB = bytesToGB(diskFreeBytes);
+                    updateDoughnut(diskChart, [diskUsedGB, diskFreeGB]);
+                    diskUsedPct = (diskUsedBytes / diskTotalBytes) * 100;
+                } else {
+                    console.warn('Disk metrics for C: not found, skipping chart update.');
+                    updateDoughnut(diskChart, [0, 0]); // Clear chart or show no data
+                }
+
+                // KPIs and status
+                const cpuUtil = cpuIdlePct != null ? (100 - cpuIdlePct) : null;
+                if (cpuUtil != null) updateKpi('cpu', cpuUtil);
+                if (memUsedGB != null && memUsedPct != null) updateKpi('mem', memUsedPct, memUsedGB);
+                if (diskUsedGB != null && diskUsedPct != null) updateKpi('disk', diskUsedPct, diskUsedGB);
+                samplesCollected += 1; document.getElementById('samples-kpi').innerText = String(samplesCollected);
+                updateUptime();
+                updateOverallStatus(cpuUtil, memUsedPct, diskUsedPct);
+
+                // History for export
+                sampleHistory.push({ timestamp: now, cpu_user: cpuUserPct, cpu_system: cpuSystemPct, cpu_idle: cpuIdlePct, mem_used_gb: memUsedGB, mem_free_gb: memFreeGB, disk_used_gb: diskUsedGB, disk_free_gb: diskFreeGB });
+                trimHistory();
+
+                // Peaks and server state
+                updatePeaks(now, cpuUtil, memUsedPct, diskUsedPct);
+                updateServerState(metrics, rows);
+
+                // Populate NIC select once
+                populateNics(rows);
+
+                // Network I/O rates for selected NIC (bytes/sec)
+                updateNetworkIo(rows, now);
+
+                // Disk I/O rates for C: (bytes/sec)
+                updateDiskIo(rows, now);
+
+            } catch (error) {
+                console.error('Error fetching or drawing metrics:', error);
+                document.getElementById('charts-container').style.display = 'none';
+                const errorContainer = document.getElementById('error-container');
+                errorContainer.style.display = 'block';
+                
+                // Update connection status to offline
+                const statusEl = errorContainer.querySelector('.connection-status');
+                const statusDot = errorContainer.querySelector('.status-dot');
+                if (statusEl && statusDot) {
+                    statusEl.className = 'connection-status offline';
+                    statusEl.innerHTML = '<div class="status-dot offline"></div>Connection Lost';
+                }
+                
+                // Show specific error details
+                const errorTitle = errorContainer.querySelector('.error-title');
+                if (errorTitle) {
+                    if (error.message.includes('Failed to fetch') || error.message.includes('connection refused')) {
+                        errorTitle.textContent = 'Server Connection Unavailable';
+                    } else if (error.message.includes('timeout')) {
+                        errorTitle.textContent = 'Connection Timeout';
+                    } else {
+                        errorTitle.textContent = 'Data Retrieval Error';
+                    }
+                }
+            }
+        }
+
+        // --- Chart Helper Functions ---
+        function addData(chart, datasetIndex, data) {
+            chart.data.datasets[datasetIndex].data.push(data);
+            const maxPoints = Math.max(2, Math.floor(windowMs / refreshMs));
+            while (chart.data.datasets[datasetIndex].data.length > maxPoints) {
+                chart.data.datasets[datasetIndex].data.shift();
+            }
+            chart.update('quiet');
+        }
+
+        function updateDoughnut(chart, data) {
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+
+        function bytesToGB(bytes) {
+            if (isNaN(bytes) || bytes === 0) return 0;
+            return (bytes / (1024 ** 3)); // return number; format when displaying
+        }
+
+        function updateKpi(kind, pct, valueGb) {
+            const pctRounded = Math.max(0, Math.min(100, Number(pct.toFixed ? pct.toFixed(1) : pct)));
+            if (kind === 'cpu') {
+                document.getElementById('cpu-kpi').innerText = `${pctRounded.toFixed(1)}%`;
+                setProgress('cpu-progress', pctRounded);
+                alertIfExceeded('CPU', pctRounded, thresholds.cpu);
+                updateSpark('cpu', pctRounded);
+            }
+            if (kind === 'mem' && valueGb != null) {
+                document.getElementById('mem-kpi').innerText = `${(valueGb.toFixed ? valueGb.toFixed(2) : valueGb)} GB`;
+                setProgress('mem-progress', pctRounded);
+                alertIfExceeded('Memory', pctRounded, thresholds.memory);
+                updateSpark('mem', pctRounded);
+            }
+            if (kind === 'disk' && valueGb != null) {
+                document.getElementById('disk-kpi').innerText = `${(valueGb.toFixed ? valueGb.toFixed(2) : valueGb)} GB`;
+                setProgress('disk-progress', pctRounded);
+                alertIfExceeded('Disk', pctRounded, thresholds.disk);
+                updateSpark('disk', pctRounded);
+            }
+        }
+
+        function setProgress(elementId, pct) {
+            const wrapper = document.getElementById(elementId);
+            const bar = wrapper.querySelector('span');
+            bar.style.width = `${pct}%`;
+            wrapper.classList.remove('warn', 'crit');
+            if (pct >= 85 && pct < 95) wrapper.classList.add('warn');
+            if (pct >= 95) wrapper.classList.add('crit');
+        }
+
+        let breachCounters = { CPU: 0, Memory: 0, Disk: 0 };
+        function alertIfExceeded(name, pct, threshold) {
+            if (pct >= threshold) {
+                breachCounters[name] += 1;
+                if (!muteAlerts && breachCounters[name] === 3) { notify(`${name} usage high (${pct.toFixed(1)}%)`); addAlert(`${name} high at ${pct.toFixed(1)}%`); }
+            } else {
+                breachCounters[name] = 0;
+            }
+        }
+
+        function updateUptime() {
+            const secs = Math.floor((Date.now() - sessionStartedAt) / 1000);
+            const mm = Math.floor(secs / 60);
+            const ss = secs % 60;
+            document.getElementById('uptime-label').innerText = `Session: ${mm}m ${ss}s`;
+        }
+
+        function updateOverallStatus(cpu, mem, disk) {
+            const pill = document.getElementById('overall-status');
+            pill.classList.remove('good', 'warn', 'crit', 'offline', 'connecting');
+            
+            // Check if we have any data (connection status)
+            if (cpu === null && mem === null && disk === null) {
+                pill.classList.add('offline');
+                pill.innerText = 'Offline';
+                return;
+            }
+            
+            let level = 'good';
+            if ((cpu != null && cpu >= thresholds.cpu) || (mem != null && mem >= thresholds.memory) || (disk != null && disk >= thresholds.disk)) level = 'warn';
+            if ((cpu != null && cpu >= 95) || (mem != null && mem >= 95) || (disk != null && disk >= 95)) level = 'crit';
+            
+            pill.classList.add(level);
+            pill.innerText = level === 'good' ? 'Healthy' : (level === 'warn' ? 'Warning' : 'Critical');
+            
+            // If we have data, update server state fields
+            if (cpu !== null || mem !== null || disk !== null) {
+                updateServerStateFields();
+            }
+        }
+        
+        function updateServerStateFields() {
+            // Update server state fields with current session info
+            const now = new Date();
+            document.getElementById('last-offline').innerText = 'Session start: ' + new Date(sessionStartedAt).toLocaleString();
+            document.getElementById('server-state').innerText = 'Connected';
+            
+            // Try to estimate boot time if we have uptime info
+            const uptimeEl = document.getElementById('last-boot');
+            if (uptimeEl.innerText === 'Initializing...') {
+                uptimeEl.innerText = 'Estimated: ' + new Date(now.getTime() - (24 * 60 * 60 * 1000)).toLocaleString(); // Fallback to 24h ago
+            }
+        }
+
+        function trimHistory() {
+            const maxSamples = Math.max(10, Math.floor(windowMs / refreshMs) + 5);
+            while (sampleHistory.length > maxSamples) sampleHistory.shift();
+        }
+
+        function notify(message) {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 3500);
+        }
+
+        function addAlert(message) {
+            const list = document.getElementById('alerts-list');
+            const li = document.createElement('li');
+            li.textContent = `${new Date().toLocaleTimeString()} — ${message}`;
+            list.prepend(li);
+        }
+
+        function addTimeline(event) {
+            const list = document.getElementById('timeline-list');
+            const li = document.createElement('li');
+            li.textContent = `${new Date().toLocaleTimeString()} — ${event}`;
+            list.prepend(li);
+        }
+
+        // Sparklines
+        const sparkCharts = {
+            cpu: new Chart(document.getElementById('spark-cpu').getContext('2d'), sparkConfig('#ef4444')),
+            mem: new Chart(document.getElementById('spark-mem').getContext('2d'), sparkConfig('#06b6d4')),
+            disk: new Chart(document.getElementById('spark-disk').getContext('2d'), sparkConfig('#10b981'))
+        };
+
+        function sparkConfig(color) {
+            return {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: color, pointRadius: 0, tension: 0.3, borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            };
+        }
+
+        function updateSpark(kind, value) {
+            const maxPoints = 50;
+            const chart = sparkCharts[kind];
+            chart.data.labels.push('');
+            chart.data.datasets[0].data.push(value);
+            while (chart.data.datasets[0].data.length > maxPoints) { chart.data.datasets[0].data.shift(); chart.data.labels.shift(); }
+            chart.update('none');
+        }
+
+        // Peak tracking
+        const peaks = { cpu: { v: 0, t: null }, mem: { v: 0, t: null }, disk: { v: 0, t: null } };
+        let peakToday = { v: 0, t: null, day: new Date().getDate() };
+        function updatePeaks(ts, cpu, mem, disk) {
+            if (cpu != null && cpu > peaks.cpu.v) { peaks.cpu.v = cpu; peaks.cpu.t = ts; document.getElementById('peak-cpu').innerText = `${cpu.toFixed(1)}% @ ${new Date(ts).toLocaleTimeString()}`; }
+            if (mem != null && mem > peaks.mem.v) { peaks.mem.v = mem; peaks.mem.t = ts; document.getElementById('peak-mem').innerText = `${mem.toFixed(1)}% @ ${new Date(ts).toLocaleTimeString()}`; }
+            if (disk != null && disk > peaks.disk.v) { peaks.disk.v = disk; peaks.disk.t = ts; document.getElementById('peak-disk').innerText = `${disk.toFixed(1)}% @ ${new Date(ts).toLocaleTimeString()}`; }
+            // Track peak CPU today
+            const d = new Date(ts).getDate();
+            if (d !== peakToday.day) { peakToday = { v: 0, t: null, day: d }; }
+            if (cpu != null && cpu > peakToday.v) { peakToday.v = cpu; peakToday.t = ts; document.getElementById('peak-cpu-today').innerText = `${cpu.toFixed(1)}% @ ${new Date(ts).toLocaleTimeString()}`; }
+        }
+
+        // Server state detection
+        let lastSeenOnline = Date.now();
+        function updateServerState(metricMap, rows) {
+            // Last boot time - try multiple sources and provide fallback
+            const bootSeconds = metricMap['node_boot_time_seconds'] ?? metricMap['windows_os_system_up_time'] ?? metricMap['windows_os_boot_time'] ?? null;
+            const bootEl = document.getElementById('last-boot');
+            if (bootSeconds) {
+                try {
+                    const bootDate = bootSeconds > 10_000 ? new Date(bootSeconds * 1000) : new Date(Date.now() - bootSeconds * 1000);
+                    bootEl.innerText = bootDate.toLocaleString();
+                } catch (e) {
+                    bootEl.innerText = 'Unable to parse';
+                }
+            } else {
+                bootEl.innerText = 'Not available';
+            }
+            
+            // Last shutdown - try to get from event logs or provide info
+            const shutdownEl = document.getElementById('last-shutdown');
+            if (metricMap['windows_event_log_shutdown_time'] || metricMap['windows_os_last_shutdown']) {
+                try {
+                    const shutdownTime = metricMap['windows_event_log_shutdown_time'] ?? metricMap['windows_os_last_shutdown'];
+                    const shutdownDate = new Date(shutdownTime * 1000);
+                    shutdownEl.innerText = shutdownDate.toLocaleString();
+                } catch (e) {
+                    shutdownEl.innerText = 'Unable to parse';
+                }
+            } else {
+                shutdownEl.innerText = 'Not available from metrics';
+            }
+            
+            // Server state detection
+            const recent = sampleHistory.slice(-3);
+            const avgCpu = recent.length ? recent.reduce((a, s) => a + (100 - (s.cpu_idle ?? 100)), 0) / recent.length : null;
+            let diskIo = rows.filter(r => r.name.endsWith('disk_read_bytes_total') || r.name.endsWith('disk_written_bytes_total') || r.name.endsWith('logical_disk_read_bytes_total') || r.name.endsWith('logical_disk_write_bytes_total'));
+            
+            const stateEl = document.getElementById('server-state');
+            if (avgCpu != null || diskIo.length > 0) {
+                const active = (avgCpu != null && avgCpu > 3) || (diskIo && diskIo.length > 0);
+                stateEl.innerText = active ? 'Active' : 'Idle/Sleeping';
+                if (active) {
+                    lastSeenOnline = Date.now();
+                }
+            } else {
+                stateEl.innerText = 'Unknown (no data)';
+            }
+            
+            // Last offline (session) - always show current session start if no offline time
+            const offlineEl = document.getElementById('last-offline');
+            if (lastSeenOnline !== sessionStartedAt) {
+                offlineEl.innerText = new Date(lastSeenOnline).toLocaleString();
+            } else {
+                offlineEl.innerText = 'Session start: ' + new Date(sessionStartedAt).toLocaleString();
+            }
+        }
+
+        // Controls
+        const rangeSelect = document.getElementById('range-select');
+        const refreshSelect = document.getElementById('refresh-select');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetZoomBtn = document.getElementById('reset-zoom-btn');
+        const exportPngBtn = document.getElementById('export-png-btn');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+        const liveToggle = document.getElementById('live-toggle');
+        const perCoreToggle = document.getElementById('per-core-toggle');
+        const contrastToggle = document.getElementById('contrast-toggle');
+        const nicSelect = document.getElementById('nic-select');
+        const muteAlertsBtn = document.getElementById('mute-alerts-btn');
+        const paletteSelect = document.getElementById('palette-select');
+
+        rangeSelect.addEventListener('change', () => { windowMs = Number(rangeSelect.value); });
+        refreshSelect.addEventListener('change', () => { refreshMs = Number(refreshSelect.value); restartTimer(); });
+        pauseBtn.addEventListener('click', () => { paused = !paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; if (!paused) { fetchAndDrawMetrics(); } });
+        resetZoomBtn.addEventListener('click', () => { if (cpuChart.resetZoom) cpuChart.resetZoom(); isUserZoomed = false; });
+
+        exportPngBtn.addEventListener('click', () => {
+            downloadImage(cpuChart, `cpu_${serverName}.png`);
+            downloadImage(memoryChart, `memory_${serverName}.png`);
+            downloadImage(diskChart, `disk_${serverName}.png`);
+        });
+
+        exportCsvBtn.addEventListener('click', () => {
+            const header = ['timestamp','cpu_user','cpu_system','cpu_idle','mem_used_gb','mem_free_gb','disk_used_gb','disk_free_gb'];
+            const rows = sampleHistory.map(s => [s.timestamp, s.cpu_user, s.cpu_system, s.cpu_idle, s.mem_used_gb, s.mem_free_gb, s.disk_used_gb, s.disk_free_gb]);
+            const csv = [header.join(','), ...rows.map(r => r.map(v => v == null ? '' : v).join(','))].join('\n');
+            downloadBlob(csv, `metrics_${serverName}_${new Date().toISOString()}.csv`, 'text/csv');
+        });
+
+        themeToggle.addEventListener('click', () => {
+            const dark = !document.body.classList.contains('dark');
+            document.body.classList.toggle('dark', dark);
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            cpuChart.update('none');
+        });
+        liveToggle.addEventListener('click', () => {
+            liveFollow = !liveFollow;
+            liveToggle.textContent = liveFollow ? 'On' : 'Off';
+            if (liveFollow) { isUserZoomed = false; }
+            localStorage.setItem('liveFollow', String(liveFollow));
+        });
+        perCoreToggle.addEventListener('click', () => {
+            perCoreMode = !perCoreMode;
+            perCoreToggle.textContent = perCoreMode ? 'On' : 'Off';
+            rebuildCpuDatasets();
+            addTimeline(`Per-core ${perCoreMode ? 'enabled' : 'disabled'}`);
+        });
+        contrastToggle.addEventListener('click', () => {
+            const on = !document.body.classList.contains('contrast');
+            document.body.classList.toggle('contrast', on);
+            contrastToggle.textContent = on ? 'On' : 'Off';
+            localStorage.setItem('contrast', String(on));
+        });
+        nicSelect.addEventListener('change', () => { selectedNic = nicSelect.value; localStorage.setItem('nic', selectedNic); });
+        muteAlertsBtn.addEventListener('click', () => { muteAlerts = !muteAlerts; muteAlertsBtn.textContent = muteAlerts ? 'Unmute Alerts' : 'Mute Alerts'; });
+
+        // Error handling buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const retryBtn = document.getElementById('retry-connection');
+            const diagnosticsBtn = document.getElementById('show-diagnostics');
+            const manualRefreshBtn = document.getElementById('manual-refresh');
+            
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    retryBtn.textContent = '🔄 Connecting...';
+                    retryBtn.disabled = true;
+                    
+                    // Update status to connecting
+                    const statusEl = document.querySelector('.connection-status');
+                    const statusDot = document.querySelector('.status-dot');
+                    if (statusEl && statusDot) {
+                        statusEl.className = 'connection-status connecting';
+                        statusEl.innerHTML = '<div class="status-dot connecting"></div>Connecting...';
+                    }
+                    
+                    // Attempt reconnection
+                    setTimeout(() => {
+                        fetchAndDrawMetrics().finally(() => {
+                            retryBtn.textContent = '🔄 Retry Connection';
+                            retryBtn.disabled = false;
+                        });
+                    }, 1000);
+                });
+            }
+            
+            if (diagnosticsBtn) {
+                diagnosticsBtn.addEventListener('click', () => {
+                    const diagnostics = {
+                        timestamp: new Date().toISOString(),
+                        server: serverName,
+                        ip: serverIp,
+                        port: '9182',
+                        userAgent: navigator.userAgent,
+                        connectionAttempts: samplesCollected,
+                        lastError: 'Connection refused'
+                    };
+                    
+                    // Show diagnostics in console and toast
+                    console.log('Connection Diagnostics:', diagnostics);
+                    notify('Diagnostics logged to console');
+                    
+                    // Copy to clipboard if supported
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
+                        notify('Diagnostics copied to clipboard');
+                    }
+                });
+            }
+            
+            if (manualRefreshBtn) {
+                manualRefreshBtn.addEventListener('click', () => {
+                    manualRefreshBtn.textContent = '🔄 Refreshing...';
+                    manualRefreshBtn.disabled = true;
+                    
+                    // Force refresh
+                    fetchAndDrawMetrics().finally(() => {
+                        manualRefreshBtn.textContent = '🔄 Manual Refresh';
+                        manualRefreshBtn.disabled = false;
+                    });
+                });
+            }
+        });
+        paletteSelect.addEventListener('change', () => {
+            // Reapply palette to CPU datasets
+            const pal = currentPalette();
+            cpuChart.data.datasets.forEach((ds, i) => {
+                ds.borderColor = pal[i % pal.length];
+                ds.backgroundColor = createGradient(cpuChartCtx, pal[i % pal.length]);
+            });
+            cpuChart.update('none');
+            localStorage.setItem('palette', paletteSelect.value);
+        });
+        (function initTheme() { const saved = localStorage.getItem('theme'); if (saved === 'dark') document.body.classList.add('dark'); })();
+
+        // Persisted preferences
+        (function initPrefs() {
+            const live = localStorage.getItem('liveFollow');
+            if (live != null) { liveFollow = live === 'true'; liveToggle.textContent = liveFollow ? 'On' : 'Off'; }
+            const palette = localStorage.getItem('palette');
+            if (palette) { paletteSelect.value = palette; paletteSelect.dispatchEvent(new Event('change')); }
+            const contrast = localStorage.getItem('contrast') === 'true';
+            document.body.classList.toggle('contrast', contrast);
+            if (contrast) contrastToggle.textContent = 'On';
+            const nic = localStorage.getItem('nic');
+            if (nic) selectedNic = nic;
+            
+            // Initialize server state fields with meaningful defaults
+            document.getElementById('last-boot').innerText = 'Initializing...';
+            document.getElementById('last-shutdown').innerText = 'Not available from metrics';
+            document.getElementById('last-offline').innerText = 'Session start: ' + new Date(sessionStartedAt).toLocaleString();
+            document.getElementById('server-state').innerText = 'Initializing...';
+        })();
+
+        function downloadImage(chart, filename) { const a = document.createElement('a'); a.href = chart.toBase64Image('image/png', 1); a.download = filename; a.click(); }
+        function downloadBlob(content, filename, mime) { const blob = new Blob([content], { type: mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
+
+        // --- Initial Load and Interval ---
+        function restartTimer() { if (timerId) clearInterval(timerId); timerId = setInterval(() => { if (!paused) fetchAndDrawMetrics(); }, refreshMs); }
+        fetchAndDrawMetrics();
+        restartTimer();
+
+        // Helpers for per-core and I/O rates
+        function ensurePerCoreDatasets(cores) {
+            // Rebuild datasets if count changed
+            const desired = cores.length;
+            if (cpuChart.data.datasets.length !== desired) {
+                cpuChart.data.datasets = cores.map((core, idx) => ({
+                    label: `Core ${core}`,
+                    data: [],
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderColor: currentPalette()[idx % currentPalette().length],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2
+                }));
+                cpuChart.update('none');
+            }
+        }
+
+        function rebuildCpuDatasets() {
+            if (!perCoreMode) {
+                // Back to aggregate: User/System/Idle/Overall
+                const pal = currentPalette();
+                cpuChart.data.datasets = ['User','System','Idle','Overall'].map((label, i) => ({
+                    label,
+                    data: [],
+                    fill: label === 'Overall' ? false : true,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderColor: label === 'Overall' ? '#e11d48' : pal[i],
+                    backgroundColor: label === 'Overall' ? 'transparent' : createGradient(cpuChartCtx, pal[i]),
+                    borderDash: label === 'Overall' ? [6,4] : undefined,
+                    borderWidth: label === 'Overall' ? 3 : 2
+                }));
+                lastCpuByCore = new Map();
+            } else {
+                cpuChart.data.datasets = []; // will be set on next fetch when cores known
+                lastCpuByCore = new Map();
+            }
+            cpuChart.update('none');
+        }
+
+        function populateNics(rows) {
+            const nics = rows.filter(r => r.name.startsWith('windows_net_bytes_received_total')).map(r => r.labels.nic).filter(Boolean);
+            let changed = false;
+            nics.forEach(n => { if (!knownNics.has(n)) { knownNics.add(n); changed = true; }});
+            if (changed) {
+                nicSelect.innerHTML = '<option value="">Auto</option>' + Array.from(knownNics).map(n => `<option value="${n}">${n}</option>`).join('');
+                if (selectedNic) nicSelect.value = selectedNic;
+            }
+        }
+
+        function updateNetworkIo(rows, now) {
+            const nic = selectedNic || rows.find(r => r.name === 'windows_net_bytes_total' && r.value > 0)?.labels?.nic || null;
+            if (!nic) return;
+            const rx = rows.find(r => r.name === 'windows_net_bytes_received_total' && r.labels.nic === nic)?.value;
+            const tx = rows.find(r => r.name === 'windows_net_bytes_sent_total' && r.labels.nic === nic)?.value;
+            if (rx == null || tx == null) return;
+            const prev = prevNet.get(nic);
+            prevNet.set(nic, { rx, tx, ts: now });
+            if (prev) {
+                const dt = (now - prev.ts) / 1000;
+                if (dt > 0) {
+                    const rxRate = Math.max(0, (rx - prev.rx) / dt);
+                    const txRate = Math.max(0, (tx - prev.tx) / dt);
+                    addData(netChart, 0, { x: now, y: Number(rxRate.toFixed(2)) });
+                    addData(netChart, 1, { x: now, y: Number(txRate.toFixed(2)) });
+                }
+            }
+        }
+
+        function updateDiskIo(rows, now) {
+            const vol = 'C:';
+            const r = rows.find(r => r.name === 'windows_logical_disk_read_bytes_total' && r.labels.volume === vol)?.value;
+            const w = rows.find(r => r.name === 'windows_logical_disk_write_bytes_total' && r.labels.volume === vol)?.value;
+            if (r == null || w == null) return;
+            const prev = prevDisk.get(vol);
+            prevDisk.set(vol, { read: r, write: w, ts: now });
+            if (prev) {
+                const dt = (now - prev.ts) / 1000;
+                if (dt > 0) {
+                    const rRate = Math.max(0, (r - prev.read) / dt);
+                    const wRate = Math.max(0, (w - prev.write) / dt);
+                    addData(diskIoChart, 0, { x: now, y: Number(rRate.toFixed(2)) });
+                    addData(diskIoChart, 1, { x: now, y: Number(wRate.toFixed(2)) });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
