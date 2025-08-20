@@ -92,7 +92,7 @@ To enable server monitoring on Windows, install Windows Exporter (Prometheus-com
 
 Go to 👉 Windows Exporter Releases
 
-Download the latest .msi installer (example: windows_exporter-0.31.2-amd64.msi).
+Download the latest .msi installer: https://github.com/prometheus-community/windows_exporter/releases
 
 Run the .msi file and complete the installation.
 
