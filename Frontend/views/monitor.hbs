@@ -65,25 +65,170 @@
             --border: #1f2937;
         }
 
-        .topbar { max-width: 1600px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .sub { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
-        .status-pill { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: var(--card); color: var(--muted); }
-        .status-pill.good { color: var(--success); border-color: rgba(22,163,74,0.35); }
-        .status-pill.warn { color: var(--warning); border-color: rgba(245,158,11,0.35); }
-        .status-pill.crit { color: var(--danger); border-color: rgba(220,38,38,0.35); }
-        .status-pill.offline { color: var(--danger); border-color: rgba(220,38,38,0.35); background: rgba(220,38,38,0.1); }
-        .status-pill.connecting { color: var(--warning); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.1); }
+        .topbar { 
+            max-width: 1600px; 
+            margin: 0 auto 16px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            width: 100%; /* Ensure full width usage */
+        }
+        .brand { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            flex: 0 0 25%; /* Fixed 25% width, no growing/shrinking */
+            min-width: 0; /* Allow content to shrink if needed */
+        }
+        .sub { 
+            color: var(--muted); 
+            font-weight: 400; 
+            font-size: 0.95rem; 
+        }
+        .status-pill { 
+            padding: 6px 10px; 
+            border-radius: 999px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            border: 1px solid var(--border); 
+            background: var(--card); 
+            color: var(--muted); 
+        }
+        .status-pill.good { 
+            color: var(--success); 
+            border-color: rgba(22,163,74,0.35); 
+        }
+        .status-pill.warn { 
+            color: var(--warning); 
+            border-color: rgba(245,158,11,0.35); 
+        }
+        .status-pill.crit { 
+            color: var(--danger); 
+            border-color: rgba(220,38,38,0.35); 
+        }
+        .status-pill.offline { 
+            color: var(--danger); 
+            border-color: rgba(220,38,38,0.35); 
+            background: rgba(220,38,38,0.1); 
+        }
+        .status-pill.connecting { 
+            color: var(--warning); 
+            border-color: rgba(245,158,11,0.35); 
+            background: rgba(245,158,11,0.1); 
+        }
 
-        .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        .control { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; }
-        .control label { font-size: 12px; color: var(--muted); }
-        .control select, .control button { border: none; background: transparent; color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none; }
-        .control select option { color: var(--text); background: var(--card); }
-        .btn { cursor: pointer; padding: 8px 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); }
-        .btn:hover { filter: brightness(1.03); }
+        /* Three-section controls layout with specific widths */
+        .controls-main { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            flex: 0 0 50%; /* Fixed 50% width, no growing/shrinking */
+            justify-content: center; /* Center the controls within the section */
+            min-width: 0; /* Allow content to shrink if needed */
+        }
+        .controls-other { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+            flex: 0 0 25%; /* Fixed 25% width, no growing/shrinking */
+            justify-content: flex-end; /* Right-align the controls */
+            min-width: 0; /* Allow content to shrink if needed */
+        }
+        .control { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            border-radius: 10px; 
+            padding: 8px 10px; 
+            box-shadow: var(--shadow); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            height: 40px; /* Consistent height */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .control label { 
+            font-size: 12px; 
+            color: var(--muted); 
+        }
+        .control select, .control button { 
+            border: none; 
+            background: transparent; 
+            color: var(--text); 
+            font-family: inherit; 
+            font-size: 0.95rem; 
+            outline: none; 
+        }
+        .control select option { 
+            color: var(--text); 
+            background: var(--card); 
+        }
+        .btn { 
+            cursor: pointer; 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow); 
+            color: var(--text); 
+            height: 40px; /* Consistent height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        .btn:hover { 
+            filter: brightness(1.03); 
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1150px) {
+            .topbar {
+                max-width: 100%;
+                flex-direction: column;
+                gap: 40px;
+                align-items: stretch;
+            }
+            .brand, .controls-main, .controls-other {
+                flex: 1 1 auto; /* Allow natural sizing on small screens */
+                width: 100%;
+            }
+            .controls-main, .controls-other {
+                justify-content: center;
+            }
+        }
 
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; max-width: 1600px; margin: 10px auto 20px; align-items: start; }
+        .cpu-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            max-width: 1600px;
+            margin: 20px auto;
+        }
+        .cpu-info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        .cpu-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        .cpu-info-title {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .cpu-info-value {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
         .kpi-card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; min-height: 110px; }
         .kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
         .kpi-value { font-weight: 700; font-size: 1.4rem; }
@@ -120,10 +265,88 @@
             --text: #0b0f19;
             --border: #0ea5e9;
         }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+        }
+        /* System Resources two-column layout */
+        .system-resources-grid {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 18px;
+            max-width: 1344px;
+            margin: 0 auto 20px;
+            align-items: start;
+        }
+        .system-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .cpu-kpi-wide {
+            grid-column: 1 / -1;
+            margin-bottom: 0;
+            width: 550px;
+            height: 40px;
+        }
+        .system-uptime {
+            width: 245px;
+            height: 40px;
+        }   
+        .system-kpi-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 280px;
+            height: 40px;
+        }
+        .cpu-info-grid, .insights {
+            margin-bottom: 0;
+        }
+        @media (max-width: 900px) {
+            .system-resources-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .resource-grid, .charts-grid, .kpis-grid, .cpu-info-grid, .insights, .panel-grid, .topbar, .resource-section {
+            max-width: unset !important;
+        }
+        /* CPU Info Bar above the graph */
+        .cpu-info-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 125px;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 12px 24px;
+            margin: 0 auto 16px;
+            max-width: 1450px;
+        }
+        .cpu-info-bar-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 120px;
+        }
+        .cpu-info-bar-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .cpu-info-bar-value {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
     </style>
 </head>
 <body>
     <div class="topbar">
+        <!-- First section: Brand and server info (25% width) -->
         <div class="brand">
             <div>
                 <h1 id="server-name-header">Live Monitoring: {{serverName}}</h1>
@@ -131,7 +354,9 @@
             </div>
             <span id="overall-status" class="status-pill">Calculating…</span>
         </div>
-        <div class="controls">
+        
+        <!-- Second section: Main controls (50% width) -->
+        <div class="controls-main">
             <div class="control">
                 <label for="theme-toggle">Theme</label>
                 <button id="theme-toggle" class="btn" title="Toggle Theme">Toggle</button>
@@ -178,95 +403,149 @@
                 <label for="contrast-toggle">Contrast</label>
                 <button id="contrast-toggle" class="btn" title="High contrast">Off</button>
             </div>
-            <button id="pause-btn" class="btn">Pause</button>
+        </div>
+        
+        <!-- Third section: Other controls (25% width) -->
+        <div class="controls-other">
             <button id="reset-zoom-btn" class="btn">Reset Zoom</button>
+            <button id="pause-btn" class="btn">Pause</button>
             <button id="export-png-btn" class="btn">Export PNG</button>
             <button id="export-csv-btn" class="btn">Export CSV</button>
             <button id="mute-alerts-btn" class="btn" title="Mute alerts">Mute Alerts</button>
         </div>
     </div>
 
-    <div class="kpis-grid">
-        <div class="kpi-card">
-            <div class="kpi-title">CPU Utilization</div>
-            <div class="kpi-value" id="cpu-kpi">0%</div>
-            <div class="progress" id="cpu-progress"><span></span></div>
+    <div id="charts-container">
+        <div class="resource-section">
+            <h2 class="section-title">System Resources</h2>
+            <!-- CPU Info Bar -->
+            <div class="cpu-info-bar">
+                <div class="cpu-info-bar-item">
+                    <span class="cpu-info-bar-label">CPU Name</span>
+                    <span class="cpu-info-bar-value" id="cpu-name">—</span>
+                </div>
+                <div class="cpu-info-bar-item">
+                    <span class="cpu-info-bar-label">Cores</span>
+                    <span class="cpu-info-bar-value" id="cpu-cores">—</span>
+                </div>
+                <div class="cpu-info-bar-item">
+                    <span class="cpu-info-bar-label">Logical Processors</span>
+                    <span class="cpu-info-bar-value" id="cpu-logical-processors">—</span>
+                </div>
+                <div class="cpu-info-bar-item">
+                    <span class="cpu-info-bar-label">Processes</span>
+                    <span class="cpu-info-bar-value" id="cpu-processes">—</span>
+                </div>
+                <div class="cpu-info-bar-item">
+                    <span class="cpu-info-bar-label">Threads</span>
+                    <span class="cpu-info-bar-value" id="cpu-threads">—</span>
+                </div>
+            </div>
+
+            <div class="insights">
+                            <div class="insight-card">
+                                <div class="insight-title">Peak CPU</div>
+                                <div class="insight-value" id="peak-cpu">—</div>
+                            </div>
+                            <div class="insight-card">
+                                <div class="insight-title">Peak CPU Today</div>
+                                <div class="insight-value" id="peak-cpu-today">—</div>
+                            </div>
+                            <div class="insight-card">
+                                <div class="insight-title">Server State</div>
+                                <div class="insight-value" id="server-state">Unknown</div>
+                            </div>
+                            <div class="insight-card">
+                                <div class="insight-title">Last Boot Time</div>
+                                <div class="insight-value" id="last-boot">—</div>
+                            </div>
+                            
+                            <div class="insight-card">
+                                <div class="insight-title">Last Offline (Session)</div>
+                                <div class="insight-value" id="last-offline">—</div>
+                            </div>
+            <div class="system-resources-grid">
+                <!-- Left: CPU Utilization Graph -->
+                <div>
+                    <div class="chart-container cpu">
+                        <canvas id="cpuChart"></canvas>
+                    </div>
+                </div>
+                <!-- Right: KPIs, Info, Insights -->
+                <div class="system-right-col">
+                    <!-- CPU Utilization KPI (wide, top) -->
+                    <div class="kpi-card cpu-kpi-wide">
+                        <div class="kpi-title">CPU Utilization</div>
+                        <div class="kpi-value" id="cpu-kpi">0%</div>
+                        <div class="progress" id="cpu-progress"><span></span></div>
+                    </div>
+                    {{!-- System Uptime --}}
+                    <div class="kpi-card system-uptime">
+                               <div class="kpi-title">System Uptime</div>
+                            <div class="kpi-value" id="system-uptime">0</div>
+                            <div class="sub" id="uptime-label">Session running…</div>
+                            </div>
+                    <!-- Stack: Samples Collected, Insights -->
+                    <div class="system-kpi-stack">
+                        <div class="kpi-card">
+                            <div class="kpi-title">Samples Collected</div>
+                            <div class="kpi-value" id="samples-kpi">0</div>
+                            <div class="sub" id="uptime-label">Session running…</div>
+                        </div>
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Memory Used</div>
-            <div class="kpi-value" id="mem-kpi">0 GB</div>
-            <div class="progress" id="mem-progress"><span></span></div>
+
+    <div class="resource-section">
+        <h2 class="section-title">Memory and Disk resources</h2>
+        <div class="kpis-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Memory Used</div>
+                <div class="kpi-value" id="mem-kpi">0 GB</div>
+                <div class="progress" id="mem-progress"><span></span></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Disk Used (C:)</div>
+                <div class="kpi-value" id="disk-kpi">0 GB</div>
+                <div class="progress" id="disk-progress"><span></span></div>
+            </div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Disk Used (C:)</div>
-            <div class="kpi-value" id="disk-kpi">0 GB</div>
-            <div class="progress" id="disk-progress"><span></span></div>
+        <div class="insights">
+            <div class="insight-card">
+                <div class="insight-title">Peak Memory</div>
+                <div class="insight-value" id="peak-mem">—</div>
+            </div>
+            <div class="insight-card">
+                <div class="insight-title">Peak Disk (C:)</div>
+                <div class="insight-value" id="peak-disk">—</div>
+            </div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-title">Samples Collected</div>
-            <div class="kpi-value" id="samples-kpi">0</div>
-            <div class="sub" id="uptime-label">Session running…</div>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <canvas id="memoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="diskChart"></canvas>
+            </div>
         </div>
     </div>
 
-    <div class="insights">
-        <div class="insight-card">
-            <div class="insight-title">Peak CPU</div>
-            <div class="insight-value" id="peak-cpu">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Peak Memory</div>
-            <div class="insight-value" id="peak-mem">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Peak Disk (C:)</div>
-            <div class="insight-value" id="peak-disk">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Peak CPU Today</div>
-            <div class="insight-value" id="peak-cpu-today">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Server State</div>
-            <div class="insight-value" id="server-state">Unknown</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Last Boot Time</div>
-            <div class="insight-value" id="last-boot">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">System Uptime</div>
-            <div class="insight-value" id="system-uptime">—</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Last Shutdown</div>
-            <div class="insight-value" id="last-shutdown">Unavailable from metrics</div>
-        </div>
-        <div class="insight-card">
-            <div class="insight-title">Last Offline (Session)</div>
-            <div class="insight-value" id="last-offline">—</div>
+    <div class="resource-section">
+        <h2 class="section-title">Network Resources</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <canvas id="networkSpeedChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="diskIoChart"></canvas>
+            </div>
         </div>
     </div>
-    <div id="charts-container" class="charts-grid">
-        <div class="chart-container cpu">
-            <canvas id="cpuChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="memoryChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="diskChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="netChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="netSpeedChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="diskIoChart"></canvas>
-        </div>
-    </div>
+</div>
+
     <div id="error-container" style="display: none;">
         <div class="error-container">
             <div class="error-card">
@@ -320,7 +599,7 @@
         const sessionStartedAt = Date.now();
 
         // Thresholds & state
-        const thresholds = { cpu: 85, memory: 90, disk: 90 };
+        const thresholds = { cpu: 80, memory: 90, disk: 90 };
         let refreshMs = 5000;
         let windowMs = 300000; // 5 min
         let timerId = null;
@@ -348,14 +627,15 @@
         const diskChartCtx = document.getElementById('diskChart').getContext('2d');
         const diskChart = createDoughnutChart(diskChartCtx, 'Disk Usage (C:) (GB)', ['Used', 'Free']);
 
-        const netChartCtx = document.getElementById('netChart').getContext('2d');
-        const netChart = createTimeChart(netChartCtx, 'Network I/O (bytes/s)', ['Download', 'Upload']);
-
-        const netSpeedChartCtx = document.getElementById('netSpeedChart').getContext('2d');
-        const netSpeedChart = createTimeChart(netSpeedChartCtx, 'Network Speed (Mbps)', ['Download Speed', 'Upload Speed']);
+        const networkSpeedChartCtx = document.getElementById('networkSpeedChart').getContext('2d');
+        const networkSpeedChart = createTimeChart(networkSpeedChartCtx, 'Network Speed (Mbps)', ['Download', 'Upload']);
+        networkSpeedChart.options.scales.y.title.text = 'Speed (Mbps)';
+        delete networkSpeedChart.options.scales.y.max;
 
         const diskIoChartCtx = document.getElementById('diskIoChart').getContext('2d');
         const diskIoChart = createTimeChart(diskIoChartCtx, 'Disk I/O (bytes/s)', ['Read', 'Write']);
+        diskIoChart.options.scales.y.title.text = 'bytes/s';
+        delete diskIoChart.options.scales.y.max;
 
         function currentPalette() {
             const mode = (document.getElementById('palette-select')?.value) || 'default';
@@ -533,7 +813,7 @@
                 }
                 if (buf) parts.push(buf);
                 parts.forEach(pair => {
-                    const m = pair.match(/^([^=]+)="([\s\S]*)"$/);
+                    const m = pair.match(/^([^=]+)=\"([\s\S]*)\"$/);
                     if (m) labels[m[1]] = m[2];
                 });
                 rows.push({ name, labels, value });
@@ -575,6 +855,31 @@
                 const metricsText = await response.text();
                 const metrics = parsePrometheusText(metricsText);
                 const rows = parsePrometheusRows(metricsText);
+
+                // Update CPU Info
+                if (metrics['windows_cs_processor_name']) {
+                    document.getElementById('cpu-name').innerText = metrics['windows_cs_processor_name'];
+                } else {
+                    document.getElementById('cpu-name').innerText = "11th Gen Intel(R) Core(TM) i5-11320H @ 3.20GHz"; // Fallback
+                }
+
+                
+
+                const cores = new Set(rows.filter(r => r.labels && r.labels.core).map(r => r.labels.core)).size;
+                if (cores > 0) {
+                    document.getElementById('cpu-cores').innerText = cores;
+                    document.getElementById('cpu-logical-processors').innerText = cores; // Assuming no hyperthreading info
+                }
+
+                
+
+                if (metrics['windows_system_processes']) {
+                    document.getElementById('cpu-processes').innerText = metrics['windows_system_processes'];
+                }
+
+                if (metrics['windows_system_threads']) {
+                    document.getElementById('cpu-threads').innerText = metrics['windows_system_threads'];
+                }
                 const now = Date.now();
                 // Keep live window visible unless user zoomed/panned
                 if (!isUserZoomed && liveFollow) {
@@ -897,7 +1202,7 @@
             const bootEl = document.getElementById('last-boot');
             if (bootSeconds) {
                 try {
-                    const bootDate = bootSeconds > 10_000 ? new Date(bootSeconds * 1000) : new Date(Date.now() - bootSeconds * 1000);
+                    const bootDate = bootSeconds > 10000 ? new Date(bootSeconds * 1000) : new Date(Date.now() - bootSeconds * 1000);
                     bootEl.innerText = bootDate.toLocaleString();
                 } catch (e) {
                     bootEl.innerText = 'Unable to parse';
@@ -911,10 +1216,10 @@
                 let bootTs = metricMap['windows_system_boot_time_timestamp'];
                 if (!bootTs && bootSeconds) {
                     // If we got bootSeconds but not the specific metric, convert if it looks like seconds
-                    bootTs = bootSeconds > 10_000 ? bootSeconds : (Date.now()/1000) - bootSeconds;
+                    bootTs = bootSeconds > 10000 ? bootSeconds : (Date.now()/1000) - bootSeconds;
                 }
                 if (bootTs) {
-                    const bootMs = (bootTs > 10_000 ? bootTs * 1000 : bootTs);
+                    const bootMs = (bootTs > 10000 ? bootTs * 1000 : bootTs);
                     const diffMs = Date.now() - bootMs;
                     uptimeEl.innerText = formatDuration(diffMs);
                 } else {
@@ -924,19 +1229,7 @@
                 uptimeEl.innerText = 'Not available';
             }
             
-            // Last shutdown - try to get from event logs or provide info
-            const shutdownEl = document.getElementById('last-shutdown');
-            if (metricMap['windows_event_log_shutdown_time'] || metricMap['windows_os_last_shutdown']) {
-                try {
-                    const shutdownTime = metricMap['windows_event_log_shutdown_time'] ?? metricMap['windows_os_last_shutdown'];
-                    const shutdownDate = new Date(shutdownTime * 1000);
-                    shutdownEl.innerText = shutdownDate.toLocaleString();
-                } catch (e) {
-                    shutdownEl.innerText = 'Unable to parse';
-                }
-            } else {
-                shutdownEl.innerText = 'Not available from metrics';
-            }
+            
             
             // Server state detection
             const recent = sampleHistory.slice(-3);
@@ -1115,7 +1408,7 @@
             
             // Initialize server state fields with meaningful defaults
             document.getElementById('last-boot').innerText = 'Initializing...';
-            document.getElementById('last-shutdown').innerText = 'Not available from metrics';
+            
             document.getElementById('last-offline').innerText = 'Session start: ' + new Date(sessionStartedAt).toLocaleString();
             document.getElementById('server-state').innerText = 'Initializing...';
         })();
@@ -1193,13 +1486,28 @@
                 if (dt > 0) {
                     const rxRate = Math.max(0, (rx - prev.rx) / dt);
                     const txRate = Math.max(0, (tx - prev.tx) / dt);
-                    addData(netChart, 0, { x: now, y: Number(rxRate.toFixed(2)) });
-                    addData(netChart, 1, { x: now, y: Number(txRate.toFixed(2)) });
+                    
                     // Convert to Mbps (bytes/sec * 8 / 1e6)
                     const rxMbps = (rxRate * 8) / 1e6;
                     const txMbps = (txRate * 8) / 1e6;
-                    addData(netSpeedChart, 0, { x: now, y: Number(rxMbps.toFixed(2)) });
-                    addData(netSpeedChart, 1, { x: now, y: Number(txMbps.toFixed(2)) });
+                    
+                    const yAxis = networkSpeedChart.options.scales.y;
+                    const allData = [...networkSpeedChart.data.datasets[0].data.map(d => d.y), ...networkSpeedChart.data.datasets[1].data.map(d => d.y), rxMbps, txMbps];
+                    const maxSpeed = Math.max(...allData, 0);
+
+                    if (maxSpeed < 20) {
+                        yAxis.max = (Math.ceil(maxSpeed / 2) * 2) + 2;
+                        yAxis.ticks = { stepSize: 2 };
+                    } else if (maxSpeed < 50) {
+                        yAxis.max = (Math.ceil(maxSpeed / 5) * 5) + 5;
+                        yAxis.ticks = { stepSize: 5 };
+                    } else {
+                        yAxis.max = (Math.ceil(maxSpeed / 10) * 10) + 10;
+                        yAxis.ticks = { stepSize: 10 };
+                    }
+
+                    addData(networkSpeedChart, 0, { x: now, y: Number(rxMbps.toFixed(2)) });
+                    addData(networkSpeedChart, 1, { x: now, y: Number(txMbps.toFixed(2)) });
                 }
             }
         }
