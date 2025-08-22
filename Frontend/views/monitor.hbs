@@ -65,20 +65,26 @@
             --border: #1f2937;
         }
 
-        .topbar { 
-            max-width: 1600px; 
-            margin: 0 auto 16px; 
-            display: flex; 
-            align-items: center; 
-            gap: 20px; 
-            width: 100%; /* Ensure full width usage */
+        .topbar {
+            max-width: 1600px;
+            margin: 0 auto 16px;
+            display: flex;
+            flex-direction: column; /* Stack rows: header then controls */
+            gap: 12px;
+            width: 100%;
         }
-        .brand { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            flex: 0 0 25%; /* Fixed 25% width, no growing/shrinking */
-            min-width: 0; /* Allow content to shrink if needed */
+        .topbar-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 0 1 auto; /* Natural sizing, allow shrink */
+            min-width: 0;
         }
         .sub { 
             color: var(--muted); 
@@ -117,25 +123,39 @@
             background: rgba(245,158,11,0.1); 
         }
 
-        /* Three-section controls layout with specific widths */
-        .controls-main { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            flex-wrap: wrap; 
-            flex: 0 0 50%; /* Fixed 50% width, no growing/shrinking */
-            justify-content: center; /* Center the controls within the section */
-            min-width: 0; /* Allow content to shrink if needed */
+        /* Controls layout */
+        .controls-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: -10px;
+            flex-wrap: wrap;
+            flex: 1 1 auto;
+            justify-content: flex-start; /* Left align as requested */
+            min-width: 0;
         }
-        .controls-other { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            flex-wrap: wrap; 
-            flex: 0 0 25%; /* Fixed 25% width, no growing/shrinking */
-            justify-content: flex-end; /* Right-align the controls */
-            min-width: 0; /* Allow content to shrink if needed */
+        .controls-other {
+            display: grid;
+            grid-template-columns: repeat(2, 200px);
+            gap: 10px;
+            flex: 1 1 auto;
+            justify-content: end;
+            align-items: stretch;
+            width: 100%;
+            min-width: 0;
+            position: relative;
+            top: 75px;
         }
+        .controls-other .btn { width: 100%; }
+        .theme-only {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .left-column { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+        .right-column { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .ip-row { display: flex; align-items: center; gap: 10px; }
+        .status-name { font-size: 0.95rem; color: var(--muted); font-weight: 500; }
         .control { 
             background: var(--card); 
             border: 1px solid var(--border); 
@@ -160,44 +180,54 @@
             font-size: 0.95rem; 
             outline: none; 
         }
+        /* Ensure inner controls fit within the outer control's padding/height */
+        .control .btn { height: 100%; box-sizing: border-box; }
+        .control select { height: 100%; box-sizing: border-box; }
         .control select option { 
             color: var(--text); 
             background: var(--card); 
         }
-        .btn { 
+        .btn {
             cursor: pointer; 
-            padding: 8px 12px; 
+            padding: 8px 16px;
             border-radius: 10px; 
             background: var(--card); 
             border: 1px solid var(--border); 
-            box-shadow: var(--shadow); 
-            color: var(--text); 
-            height: 40px; /* Consistent height */
+            height: 55px;
+            gap: bottom 5px;  
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
             min-width: 80px;
-            flex-shrink: 0; /* Prevent shrinking */
-        }
+            flex-shrink: 0;
+            box-sizing: border-box;
+            color: var(--text);
+
+            /* ✅ Fix */
+            overflow: hidden;
+            }
+
         .btn:hover { 
             filter: brightness(1.03); 
         }
 
+        /* Alignment and sizing per request */
+        .control-sm { width:150px}
+        .control-sm select, .control-sm button { width: 100%; }
+        .control-nic { width: 360px; }
+        .control-nic select { width: 100%; }
+        /* Place Window and Refresh directly under NIC and matching NIC width split equally */
+        .control-nic-child { width: 180px; }
+        .control-nic-child select { width: 100%; }
+
         /* Responsive adjustments */
         @media (max-width: 1150px) {
-            .topbar {
-                max-width: 100%;
-                flex-direction: column;
-                gap: 40px;
-                align-items: stretch;
-            }
-            .brand, .controls-main, .controls-other {
-                flex: 1 1 auto; /* Allow natural sizing on small screens */
-                width: 100%;
-            }
-            .controls-main, .controls-other {
-                justify-content: center;
-            }
+            .topbar { max-width: 100%; }
+            .topbar-row { flex-direction: column; gap: 12px; align-items: stretch; }
+            .theme-only { justify-content: flex-start; }
+            .left-column, .right-column { align-items: stretch; }
+            .controls-main, .controls-other { justify-content: center; width: 100%; }
         }
 
         .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; max-width: 1600px; margin: 10px auto 20px; align-items: start; }
@@ -262,7 +292,7 @@
         /* High contrast option */
         body.contrast {
             --card: #e2e8f0;
-            --text: #0b0f19;
+            --text: #7496eb;
             --border: #0ea5e9;
         }
         .section-title {
@@ -346,51 +376,55 @@
 </head>
 <body>
     <div class="topbar">
-        <!-- First section: Brand and server info (25% width) -->
-        <div class="brand">
-            <div>
-                <h1 id="server-name-header">Live Monitoring: {{serverName}}</h1>
-                <div class="sub">IP: <span id="server-ip-label">{{serverIp}}</span></div>
+        <div class="topbar-row">
+            <!-- Left column: Title/IP and left controls -->
+            <div class="left-column" style="flex:1 1 auto; min-width:0;">
+                <div class="brand" style="padding:0; gap:12px;">
+                    <div>
+                        <h1 id="server-name-header">Live Monitoring: {{serverName}}</h1>
+                        <div class="ip-row">
+                            <div class="sub">IP: <span id="server-ip-label">{{serverIp}}</span></div>
+                            <span class="status-name">Usage Status:</span>
+                            <span id="overall-status" class="status-pill">Calculating…</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Left-aligned control group under IP -->
+                <div class="controls-main">
+                    <div class="control control-sm control-live">
+                        <label for="live-toggle">Live</label>
+                        <button id="live-toggle" class="btn" title="Follow live">On</button>
+                    </div>
+                    <div class="control control-sm control-percore">
+                        <label for="per-core-toggle">Per-core</label>
+                        <button id="per-core-toggle" class="btn" title="Expand per-core">Off</button>
+                    </div>
+                    <div class="control control-nic">
+                        <label for="nic-select">NIC</label>
+                        <select id="nic-select"><option value="">Auto</option></select>
+                    </div>
+                </div>
             </div>
-            <span id="overall-status" class="status-pill">Calculating…</span>
+            <!-- Right column: Theme and utility buttons -->
+            <div class="right-column" style="flex:0 0 360px; min-width:360px;">
+                <div class="theme-only">
+                    <div class="control" style="width:100%;">
+                        <label for="theme-toggle">Theme</label>
+                        <button id="theme-toggle" class="btn" title="Toggle Theme">Toggle</button>
+                    </div>
+                </div>
+                <div class="controls-other">
+                    <button id="pause-btn" class="btn">Pause</button>
+                    <button id="export-png-btn" class="btn">Export PNG</button>
+                    <button id="export-csv-btn" class="btn">Export CSV</button>
+                    <button id="mute-alerts-btn" class="btn" title="Mute alerts">Mute Alerts</button>
+                </div>
+            </div>
         </div>
-        
-        <!-- Second section: Main controls (50% width) -->
+
+        <!-- Controls row (second row) -->
         <div class="controls-main">
-            <div class="control">
-                <label for="theme-toggle">Theme</label>
-                <button id="theme-toggle" class="btn" title="Toggle Theme">Toggle</button>
-            </div>
-            <div class="control">
-                <label for="live-toggle">Live</label>
-                <button id="live-toggle" class="btn" title="Follow live">On</button>
-            </div>
-            <div class="control">
-                <label for="per-core-toggle">Per-core</label>
-                <button id="per-core-toggle" class="btn" title="Expand per-core">Off</button>
-            </div>
-            <div class="control">
-                <label for="nic-select">NIC</label>
-                <select id="nic-select"><option value="">Auto</option></select>
-            </div>
-            <div class="control">
-                <label for="range-select">Window</label>
-                <select id="range-select">
-                    <option value="60000">1 min</option>
-                    <option value="300000" selected>5 min</option>
-                    <option value="900000">15 min</option>
-                    <option value="3600000">1 hour</option>
-                </select>
-            </div>
-            <div class="control">
-                <label for="refresh-select">Refresh</label>
-                <select id="refresh-select">
-                    <option value="2000">2s</option>
-                    <option value="5000" selected>5s</option>
-                    <option value="10000">10s</option>
-                </select>
-            </div>
-            <div class="control">
+            <div class="control control-sm control-palette">
                 <label for="palette-select">Palette</label>
                 <select id="palette-select">
                     <option value="default" selected>Default</option>
@@ -399,19 +433,32 @@
                     <option value="forest">Forest</option>
                 </select>
             </div>
-            <div class="control">
+            <div class="control control-sm control-contrast" >
                 <label for="contrast-toggle">Contrast</label>
                 <button id="contrast-toggle" class="btn" title="High contrast">Off</button>
             </div>
+            <div class="control control-nic-child control-window">
+                <label for="range-select">Window</label>
+                <select id="range-select">
+                    <option value="60000">1 min</option>
+                    <option value="300000" selected>5 min</option>
+                    <option value="900000">15 min</option>
+                    <option value="3600000">1 hour</option>
+                </select>
+            </div>
+            <div class="control control-sm control-refresh">
+                <label for="refresh-select">Refresh</label>
+                <select id="refresh-select">
+                    <option value="2000">2s</option>
+                    <option value="5000" selected>5s</option>
+                    <option value="10000">10s</option>
+                </select>
+            </div>
         </div>
-        
-        <!-- Third section: Other controls (25% width) -->
-        <div class="controls-other">
-            <button id="reset-zoom-btn" class="btn">Reset Zoom</button>
-            <button id="pause-btn" class="btn">Pause</button>
-            <button id="export-png-btn" class="btn">Export PNG</button>
-            <button id="export-csv-btn" class="btn">Export CSV</button>
-            <button id="mute-alerts-btn" class="btn" title="Mute alerts">Mute Alerts</button>
+            </div>
+            
+            <!-- Right column: Theme and utility buttons -->
+           
         </div>
     </div>
 
@@ -1274,7 +1321,12 @@
         rangeSelect.addEventListener('change', () => { windowMs = Number(rangeSelect.value); });
         refreshSelect.addEventListener('change', () => { refreshMs = Number(refreshSelect.value); restartTimer(); });
         pauseBtn.addEventListener('click', () => { paused = !paused; pauseBtn.textContent = paused ? 'Resume' : 'Pause'; if (!paused) { fetchAndDrawMetrics(); } });
-        resetZoomBtn.addEventListener('click', () => { if (cpuChart.resetZoom) cpuChart.resetZoom(); isUserZoomed = false; });
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', () => {
+                if (cpuChart.resetZoom) cpuChart.resetZoom();
+                isUserZoomed = false;
+            });
+        }
 
         exportPngBtn.addEventListener('click', () => {
             downloadImage(cpuChart, `cpu_${serverName}.png`);
