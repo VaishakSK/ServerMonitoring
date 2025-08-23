@@ -1,0 +1,179 @@
+.theme-toggle-container {
+    position: relative;
+    display: inline-block;
+}
+
+.theme-toggle-btn {
+    background: var(--theme-toggle-bg, #f3f4f6);
+    border: 2px solid var(--theme-toggle-border, #d1d5db);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--theme-toggle-hover-bg, #e5e7eb);
+    border-color: var(--theme-toggle-hover-border, #9ca3af);
+    transform: scale(1.05);
+}
+
+.theme-toggle-btn i {
+    font-size: 16px;
+    transition: all 0.3s ease;
+    position: absolute;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.theme-toggle-btn .light-icon {
+    color: #f59e0b;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.theme-toggle-btn .dark-icon {
+    color: #6366f1;
+}
+
+.theme-toggle-btn .system-icon {
+    color: #10b981;
+}
+
+/* Dark theme button styles */
+[data-theme="dark"] .theme-toggle-btn {
+    background: var(--theme-toggle-bg, #374151);
+    border-color: var(--theme-toggle-border, #4b5563);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background: var(--theme-toggle-hover-bg, #4b5563);
+    border-color: var(--theme-toggle-hover-border, #6b7280);
+}
+
+[data-theme="dark"] .theme-toggle-btn .light-icon {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+[data-theme="dark"] .theme-toggle-btn .dark-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* System theme button styles */
+[data-theme="system"] .theme-toggle-btn .light-icon,
+[data-theme="system"] .theme-toggle-btn .dark-icon {
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+[data-theme="system"] .theme-toggle-btn .system-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.theme-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: var(--theme-dropdown-bg, white);
+    border: 1px solid var(--theme-dropdown-border, #e5e7eb);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    min-width: 140px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.theme-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    margin: 4px;
+}
+
+.theme-option:hover {
+    background: var(--theme-option-hover-bg, #f3f4f6);
+}
+
+.theme-option i {
+    font-size: 14px;
+    width: 16px;
+    text-align: center;
+}
+
+.theme-option .light-icon {
+    color: #f59e0b;
+}
+
+.theme-option .dark-icon {
+    color: #6366f1;
+}
+
+.theme-option .system-icon {
+    color: #10b981;
+}
+
+.theme-option span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--theme-option-text, #374151);
+}
+
+/* Dark theme dropdown styles */
+[data-theme="dark"] .theme-dropdown {
+    background: var(--theme-dropdown-bg, #1f2937);
+    border-color: var(--theme-dropdown-border, #374151);
+}
+
+[data-theme="dark"] .theme-option:hover {
+    background: var(--theme-option-hover-bg, #374151);
+}
+
+[data-theme="dark"] .theme-option span {
+    color: var(--theme-option-text, #f9fafb);
+}
+
+/* CSS Variables for theme customization */
+:root {
+    --theme-toggle-bg: #f3f4f6;
+    --theme-toggle-border: #d1d5db;
+    --theme-toggle-hover-bg: #e5e7eb;
+    --theme-toggle-hover-border: #9ca3af;
+    --theme-dropdown-bg: white;
+    --theme-dropdown-border: #e5e7eb;
+    --theme-option-hover-bg: #f3f4f6;
+    --theme-option-text: #374151;
+}
+
+[data-theme="dark"] {
+    --theme-toggle-bg: #374151;
+    --theme-toggle-border: #4b5563;
+    --theme-toggle-hover-bg: #4b5563;
+    --theme-toggle-hover-border: #6b7280;
+    --theme-dropdown-bg: #1f2937;
+    --theme-dropdown-border: #374151;
+    --theme-option-hover-bg: #374151;
+    --theme-option-text: #f9fafb;
+}

@@ -6,6 +6,7 @@
     <title>{{title}} - Server Monitoring</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/theme-toggle.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -98,6 +99,27 @@
 
         .alert-danger {
             background: #dc3545;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .footer-text {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
         }
 
         .password-wrapper {
@@ -550,10 +572,54 @@
         .form-group input:focus, .form-group select:focus {
             transition: box-shadow .2s ease, border-color .2s ease;
         }
+        
+        /* Dark Theme Styles */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #475569;
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .container {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] h1 {
+            color: #ef4444;
+        }
+        
+        [data-theme="dark"] .form-group label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .form-group input,
+        [data-theme="dark"] .form-group select {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .section-title {
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
     <a href="/dashboard" class="btn-secondary floating-back" style="position: fixed; top: 16px; left: 16px; z-index: 1000; text-decoration: none;">← Back to Dashboard</a>
+    
+    <!-- Theme Toggle -->
+    <div style="position: fixed; top: 16px; right: 16px; z-index: 1000;">
+                        {{themeToggle}}
+    </div>
     <div class="container">
         <h1>{{title}}</h1>
         {{#if activeTeamsCount}}
@@ -883,5 +949,15 @@
             }
         });
     </script>
+    <script src="/js/theme-toggle.js"></script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2025 KLE Technological University - CAIR Lab. 
+            </p>
+        </div>
+    </footer>
 </body>
 </html>

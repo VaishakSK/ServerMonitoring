@@ -6,6 +6,7 @@
     <title>KLE Tech University - Server Monitoring Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/theme-toggle.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -259,6 +260,16 @@
             color: white;
         }
 
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
+        }
+
         /* Server Grid */
         .servers-section {
             background: white;
@@ -279,6 +290,52 @@
             font-size: 2rem;
             font-weight: 700;
             color: #333;
+        }
+
+        .section-header .bg-blue-600 {
+            background-color: #2563eb;
+        }
+
+        .section-header .hover\:bg-blue-700:hover {
+            background-color: #1d4ed8;
+        }
+
+        .section-header .text-white {
+            color: white;
+        }
+
+        .section-header .px-6 {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .section-header .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-header .rounded-lg {
+            border-radius: 0.5rem;
+        }
+
+        .section-header .font-medium {
+            font-weight: 500;
+        }
+
+        .section-header .transition-colors {
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .section-header .inline-flex {
+            display: inline-flex;
+        }
+
+        .section-header .items-center {
+            align-items: center;
+        }
+
+        .section-header .gap-2 {
+            gap: 0.5rem;
         }
 
         .server-grid {
@@ -372,8 +429,19 @@
         }
 
         .server-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .server-actions .action-btn {
+            width: 100%;
+            height: 40px;
+            min-width: 80px;
+            white-space: nowrap;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
         }
 
         .action-btn {
@@ -384,7 +452,12 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            flex: 1;
+            text-decoration: none;
+            text-align: center;
+            height: 40px;
+            min-height: 40px;
+            max-height: 40px;
+            box-sizing: border-box;
         }
 
         .server-actions form {
@@ -505,8 +578,79 @@
             to   { transform: translateX(18px) scale(.98); opacity: 0; }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
+
+
+                 /* Dark Theme Styles */
+         [data-theme="dark"] {
+             --bg-primary: #0f172a;
+             --bg-secondary: #1e293b;
+             --bg-card: #334155;
+             --text-primary: #f1f5f9;
+             --text-secondary: #cbd5e1;
+             --border-color: #475569;
+             --shadow-color: rgba(0, 0, 0, 0.3);
+         }
+         
+         [data-theme="dark"] body {
+             background: var(--bg-primary);
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .stat-card {
+             background: var(--bg-card);
+             border-color: var(--border-color);
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .stat-card .stat-number {
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .stat-card .stat-label {
+             color: var(--text-secondary);
+         }
+         
+         [data-theme="dark"] .search-section,
+         [data-theme="dark"] .servers-section {
+             background: var(--bg-card);
+             border-color: var(--border-color);
+         }
+         
+         [data-theme="dark"] .search-input {
+             background: var(--bg-secondary);
+             border-color: var(--border-color);
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .search-input::placeholder {
+             color: var(--text-secondary);
+         }
+         
+         [data-theme="dark"] .server-card {
+             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+             border-color: var(--border-color);
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .server-card .server-name {
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .info-label {
+             color: var(--text-secondary);
+         }
+         
+         [data-theme="dark"] .info-value {
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .no-servers-message {
+             background: var(--bg-secondary);
+             color: var(--text-secondary);
+         }
+         
+         /* Responsive Design */
+         @media (max-width: 768px) {
             .header-content h1 {
                 font-size: 2.5rem;
             }
@@ -545,6 +689,17 @@
             .server-info {
                 grid-template-columns: 1fr;
             }
+
+            /* Server actions responsive adjustments */
+            .server-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .server-actions .action-btn {
+                min-width: auto;
+                width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
@@ -571,6 +726,8 @@
             .stat-number {
                 font-size: 2rem;
             }
+
+
         }
     </style>
 </head>
@@ -592,13 +749,16 @@
                 <i class="fas fa-server"></i>
                 <h2>KLE Tech Monitoring</h2>
             </a>
-            <ul class="nav-menu">
-                <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
-                <li><a href="#" onclick="promptForCodeAndRedirect('/server/add')"><i class="fas fa-plus-circle"></i> Add Server</a></li>
-                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
-                <li><a href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
+                         <ul class="nav-menu">
+                 <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                 <li><a href="/server-analysis"><i class="fas fa-chart-line"></i> Server Analysis</a></li>
+                 <li><a href="#" onclick="promptForCodeAndRedirect('/server/add')"><i class="fas fa-plus-circle"></i> Add Server</a></li>
+                 <li><a href="/settings"><i class="fas fa-cog"></i> Settings</a></li>
+                 <li><a href="/"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+             </ul>
+             
+             <!-- Theme Toggle -->
+             {{themeToggle}}
         </div>
     </nav>
 
@@ -650,11 +810,7 @@
         </div>
 
         <!-- Servers Section -->
-        <div class="servers-section">
-            <div class="section-header">
-                <h2 class="section-title">Server Infrastructure</h2>
-            </div>
-            
+        <div class="servers-section">            
             <div class="server-grid">
                 {{#each servers}}
                 <div class="server-card" data-ip="{{this.serverIp}}" data-id="{{this._id}}">
@@ -685,8 +841,11 @@
                         </div>
                     </div>
                     <div class="server-actions">
-                        <a href="#" class="action-btn btn-primary" data-action="monitor">Monitor</a>
-                        <a href="#" class="action-btn btn-success" data-action="manage" data-url="/server/edit/{{this._id}}">Manage</a>
+                        <button class="action-btn btn-primary" data-action="monitor">Monitor</button>
+                        <button class="action-btn btn-success" data-action="manage" data-url="/server/edit/{{this._id}}">Manage</button>
+                        <a href="/analyze/{{this._id}}" class="action-btn btn-info">
+                            <i class="fas fa-chart-line"></i> Analyze
+                        </a>
                         <form action="/server/delete/{{this._id}}" method="POST" onsubmit="return handleDelete(this);">
                             <button type="submit" class="action-btn btn-danger">Delete</button>
                         </form>
@@ -707,6 +866,8 @@
             </p>
         </div>
     </footer>
+
+
 
    <script>
     function promptForCodeAndRedirect(url) {
@@ -796,7 +957,7 @@
         }, 280);
     }
 
-    // Action button functionality (Monitor / Manage)
+    // Action button functionality (Monitor / Manage / Analyze)
     document.querySelectorAll('.action-btn').forEach(button => {
         button.addEventListener('click', function(event) {
             const action = (this.dataset.action || this.textContent || '').trim();
@@ -928,4 +1089,8 @@
 
         return []; // if all fail
     }
+
+
+
 </script>
+<script src="/js/theme-toggle.js"></script>

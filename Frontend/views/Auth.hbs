@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server Monitoring System - Authentication</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="/css/theme-toggle.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -22,6 +23,36 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
+        }
+        
+        /* Light Theme Styles */
+        [data-theme="light"] body {
+            background: #ffffff;
+        }
+        
+        [data-theme="light"] .bg-animation {
+            background: linear-gradient(45deg, #ffffff, #f0f0f0, #e0e0e0, #d0d0d0);
+        }
+        
+        [data-theme="light"] .auth-container {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        [data-theme="light"] .header h1,
+        [data-theme="light"] .header p {
+            color: #333;
+        }
+        
+        [data-theme="light"] .form-group label {
+            color: #333;
+        }
+        
+        [data-theme="light"] .form-group input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #333;
         }
 
         /* Animated Background */
@@ -563,6 +594,25 @@
             }
         }
 
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .footer-text {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
 
     </style>
 </head>
@@ -579,6 +629,9 @@
             <div class="logo-icon">🖥️</div>
             <h1>Server Monitoring</h1>
             <p>Secure Authentication Portal</p>
+            
+            <!-- Theme Toggle -->
+                            {{themeToggle}}
         </div>
 
         <!-- Login Form -->
@@ -811,5 +864,15 @@
             authContainer.classList.add('login-mode');
         });
     </script>
+    <script src="/js/theme-toggle.js"></script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2025 KLE Technological University - CAIR Lab. 
+            </p>
+        </div>
+    </footer>
 </body>
 </html>
