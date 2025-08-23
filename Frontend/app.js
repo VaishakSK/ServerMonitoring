@@ -9,7 +9,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 
 const app = express();
-const port = 7887;
+const port = process.env.PORT;
 
 // Import routes
 const authRoutes = require('./routes/AuthRoutes');
