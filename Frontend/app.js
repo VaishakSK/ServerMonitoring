@@ -9,13 +9,14 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 
 const app = express();
-const port = 7887;
+const port = 7171;
 
 // Import routes
 const authRoutes = require('./routes/AuthRoutes');
 const serverRoutes = require('./routes/server');
 const homeRoutes = require('./routes/home');
 const dashboardRoutes = require('./routes/dashboard');
+const apiRoutes = require('./routes/api');
 const { requireSecurityCode } = require('./middleware/security');
 
 // Middlewar
@@ -84,6 +85,34 @@ app.get('/api/metrics', async (req, res) => {
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Register theme-toggle helper instead of partial
+hbs.registerHelper('themeToggle', function() {
+    return new hbs.SafeString(`
+        <div class="theme-toggle-container">
+            <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+                <i class="fas fa-sun light-icon"></i>
+                <i class="fas fa-moon dark-icon"></i>
+                <i class="fas fa-desktop system-icon"></i>
+            </button>
+            
+            <div class="theme-dropdown" id="theme-dropdown">
+                <div class="theme-option" data-theme="light">
+                    <i class="fas fa-sun"></i>
+                    <span>Light</span>
+                </div>
+                <div class="theme-option" data-theme="dark">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark</span>
+                </div>
+                <div class="theme-option" data-theme="system">
+                    <i class="fas fa-desktop"></i>
+                    <span>System</span>
+                </div>
+            </div>
+        </div>
+    `);
+});
+
 hbs.registerHelper('eq', function (a, b) {
     return a === b;
 });
@@ -98,6 +127,23 @@ hbs.registerHelper('range', function (start, end) {
 
 hbs.registerHelper('concat', function (a, b) {
     return a + b;
+});
+
+hbs.registerHelper('json', function (obj) {
+    return JSON.stringify(obj);
+});
+
+hbs.registerHelper('multiply', function (a, b) {
+    return a * b;
+});
+
+hbs.registerHelper('divide', function (a, b) {
+    return b !== 0 ? a / b : 0;
+});
+
+hbs.registerHelper('formatDate', function (date) {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleString();
 });
 
 // Serve static files
@@ -133,5 +179,6 @@ app.get('/auth', (req, res) => {
 // Use API routes
 app.use('/', homeRoutes);
 app.use('/api', authRoutes);
+app.use('/api', apiRoutes);
 app.use('/server', serverRoutes);
 app.use('/', dashboardRoutes);
