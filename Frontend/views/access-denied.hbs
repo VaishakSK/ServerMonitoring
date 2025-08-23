@@ -107,11 +107,68 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .footer-text {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        /* Dark Theme Styles */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+        }
+        
+        [data-theme="dark"] body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .container {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] h1 {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] p {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .redirect-message {
+            color: var(--text-secondary);
+        }
     </style>
     <!-- Using Font Awesome for the icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="/css/theme-toggle.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <div style="position: fixed; top: 16px; right: 16px; z-index: 1000;">
+        {{themeToggle}}
+    </div>
+    
     <div class="container">
         <div class="icon">
             <i class="fas fa-user-lock"></i>
@@ -138,5 +195,15 @@
             }
         }, 1000);
     </script>
+    <script src="/js/theme-toggle.js"></script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2025 KLE Technological University - CAIR Lab. 
+            </p>
+        </div>
+    </footer>
 </body>
 </html>

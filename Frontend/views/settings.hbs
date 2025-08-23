@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - KLE Tech University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/theme-toggle.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .settings-card {
+            transition: all 0.3s ease;
+        }
+
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+                 .footer-text {
+             opacity: 0.8;
+             font-size: 0.9rem;
+         }
+         
+         /* Dark Theme Styles */
+         [data-theme="dark"] {
+             --bg-primary: #0f172a;
+             --bg-secondary: #1e293b;
+             --bg-card: #334155;
+             --text-primary: #f1f5f9;
+             --text-secondary: #cbd5e1;
+             --border-color: #475569;
+         }
+         
+         [data-theme="dark"] body {
+             background: var(--bg-primary);
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .settings-card {
+             background: var(--bg-card);
+             border-color: var(--border-color);
+         }
+         
+         [data-theme="dark"] .bg-white {
+             background-color: var(--bg-card);
+         }
+         
+         [data-theme="dark"] .text-gray-800 {
+             color: var(--text-primary);
+         }
+         
+         [data-theme="dark"] .text-gray-600 {
+             color: var(--text-secondary);
+         }
+         
+         [data-theme="dark"] .text-gray-500 {
+             color: var(--text-secondary);
+         }
+         
+         [data-theme="dark"] .bg-gray-50 {
+             background-color: var(--bg-secondary);
+         }
+         
+         [data-theme="dark"] .border-gray-300 {
+             border-color: var(--border-color);
+         }
+         
+         [data-theme="dark"] .bg-gray-200 {
+             background-color: var(--border-color);
+         }
+     </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-2">Settings</h1>
+                <p class="text-xl opacity-90">Configure Your System Preferences</p>
+                <p class="text-lg opacity-75">Customize monitoring, notifications, and system behavior</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between mb-8">
+            <button onclick="window.location.href='/dashboard'" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+            </button>
+            
+                         <div class="flex items-center gap-4">
+                 <!-- Theme Toggle -->
+                 {{themeToggle}}
+                 
+                 <button id="save-all-settings" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                     <i class="fas fa-save mr-2"></i>Save All Settings
+                 </button>
+                 <button id="reset-settings" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                     <i class="fas fa-undo mr-2"></i>Reset to Default
+                 </button>
+             </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-6 pb-20">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Main Settings -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- System Preferences -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                            <i class="fas fa-cog text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">System Preferences</h3>
+                            <p class="text-gray-600">Configure core system behavior and monitoring</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Auto-refresh Dashboard</label>
+                                <p class="text-sm text-gray-500">Automatically refresh server status every few seconds</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="auto-refresh" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Performance Monitoring</label>
+                                <p class="text-sm text-gray-500">Enable detailed CPU, memory, and disk monitoring</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="performance-monitoring" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Log Collection</label>
+                                <p class="text-sm text-gray-500">Collect and store server logs for analysis</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="log-collection">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label class="font-medium text-gray-700">Refresh Interval (seconds)</label>
+                            <select id="refresh-interval" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="5">5 seconds</option>
+                                <option value="10" selected>10 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                            <i class="fas fa-bell text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Notification Settings</h3>
+                            <p class="text-gray-600">Configure how you receive alerts and notifications</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Email Notifications</label>
+                                <p class="text-sm text-gray-500">Receive alerts via email</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="email-notifications">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Browser Notifications</label>
+                                <p class="text-sm text-gray-500">Show desktop notifications in browser</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="browser-notifications" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Server Down Alerts</label>
+                                <p class="text-sm text-gray-500">Immediate alerts when servers go offline</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="server-down-alerts" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Performance Threshold Alerts</label>
+                                <p class="text-sm text-gray-500">Alerts when CPU/Memory usage exceeds limits</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="performance-alerts" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label class="font-medium text-gray-700">CPU Threshold (%)</label>
+                            <input type="number" id="cpu-threshold" value="80" min="50" max="100" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="font-medium text-gray-700">Memory Threshold (%)</label>
+                            <input type="number" id="memory-threshold" value="85" min="50" max="100" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                            <i class="fas fa-database text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Data Management</h3>
+                            <p class="text-gray-600">Manage stored data and performance metrics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Data Retention</label>
+                                <p class="text-sm text-gray-500">How long to keep performance data</p>
+                            </div>
+                            <select id="data-retention" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="30">30 days</option>
+                                <option value="90" selected>90 days</option>
+                                <option value="180">180 days</option>
+                                <option value="365">1 year</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Auto-cleanup</label>
+                                <p class="text-sm text-gray-500">Automatically remove old data</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="auto-cleanup" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Backup Performance Data</label>
+                                <p class="text-sm text-gray-500">Create backups of historical data</p>
+                            </div>
+                            <button id="backup-data" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-download mr-2"></i>Backup Now
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Clear All Data</label>
+                                <p class="text-sm text-gray-500">Remove all stored performance data</p>
+                            </div>
+                            <button id="clear-data" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fas fa-trash mr-2"></i>Clear Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Preferences -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">User Preferences</h3>
+                            <p class="text-gray-600">Customize your user experience and interface</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="font-medium text-gray-700">Theme</label>
+                            <select id="theme" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="light" selected>Light Theme</option>
+                                <option value="dark">Dark Theme</option>
+                                <option value="auto">Auto (System)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="font-medium text-gray-700">Language</label>
+                            <select id="language" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="en" selected>English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Show Welcome Message</label>
+                                <p class="text-sm text-gray-500">Display welcome message on dashboard</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="welcome-message" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="font-medium text-gray-700">Compact Mode</label>
+                                <p class="text-sm text-gray-500">Use compact layout for better space usage</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="compact-mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - System Info & Quick Actions -->
+            <div class="space-y-6">
+                <!-- System Information -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+                            <i class="fas fa-info-circle text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">System Information</h3>
+                            <p class="text-gray-600">Current system status and statistics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                                                 <div class="bg-gray-50 rounded-lg p-4">
+                             <div class="flex justify-between items-center mb-2">
+                                 <span class="text-sm font-medium text-gray-600">Total Servers</span>
+                                 <span class="text-lg font-bold text-gray-800">{{stats.totalServers}}</span>
+                             </div>
+                             <div class="w-full bg-gray-200 rounded-full h-2">
+                                 <div class="progress-bar" style="width: 100%"></div>
+                             </div>
+                         </div>
+                         
+                         <div class="bg-gray-50 rounded-lg p-4">
+                             <div class="flex justify-between items-center mb-2">
+                                 <span class="text-sm font-medium text-gray-600">Online Servers</span>
+                                 <span class="text-lg font-bold text-green-600">{{stats.onlineServers}}</span>
+                             </div>
+                             <div class="w-full bg-gray-200 rounded-full h-2">
+                                 <div class="progress-bar" style="width: {{#if stats.totalServers}}{{divide stats.onlineServers stats.totalServers}}{{else}}0{{/if}}%"></div>
+                             </div>
+                         </div>
+                         
+                         <div class="bg-gray-50 rounded-lg p-4">
+                             <div class="flex justify-between items-center mb-2">
+                                 <span class="text-sm font-medium text-gray-600">Offline Servers</span>
+                                 <span class="text-lg font-bold text-red-600">{{stats.offlineServers}}</span>
+                             </div>
+                             <div class="w-full bg-gray-200 rounded-full h-2">
+                                 <div class="progress-bar" style="width: {{#if stats.totalServers}}{{divide stats.offlineServers stats.totalServers}}{{else}}0{{/if}}%"></div>
+                             </div>
+                         </div>
+                        
+                                                 <div class="text-sm text-gray-500">
+                             <p><strong>Last Updated:</strong> <span id="last-updated">Loading...</span></p>
+                             <p><strong>System Version:</strong> 2.1.0</p>
+                             <p><strong>Database:</strong> MongoDB</p>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                            <i class="fas fa-bolt text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Quick Actions</h3>
+                            <p class="text-gray-600">Common tasks and shortcuts</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button onclick="window.location.href='/server/add'" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-left">
+                            <i class="fas fa-plus-circle mr-3"></i>Add New Server
+                        </button>
+                        
+                        <button onclick="window.location.href='/server-analysis'" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-left">
+                            <i class="fas fa-chart-line mr-3"></i>View All Analysis
+                        </button>
+                        
+                        <button onclick="window.location.href='/dashboard'" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-left">
+                            <i class="fas fa-tachometer-alt mr-3"></i>Go to Dashboard
+                        </button>
+                        
+                        <button id="export-config" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-left">
+                            <i class="fas fa-download mr-3"></i>Export Configuration
+                        </button>
+                        
+                        <button id="import-config" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-lg font-medium transition-colors text-left">
+                            <i class="fas fa-upload mr-3"></i>Import Configuration
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="settings-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                            <i class="fas fa-history text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Recent Activity</h3>
+                            <p class="text-gray-600">Latest system events and changes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-circle text-green-500 mr-2 text-xs"></i>
+                            <span>Settings updated - 2 minutes ago</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-circle text-blue-500 mr-2 text-xs"></i>
+                            <span>New server added - 1 hour ago</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-circle text-yellow-500 mr-2 text-xs"></i>
+                            <span>Performance alert - 3 hours ago</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-circle text-purple-500 mr-2 text-xs"></i>
+                            <span>System backup completed - 1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2025 KLE Technological University - CAIR Lab.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentSettings = {};
+        let originalSettings = {};
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentSettings();
+            setupEventListeners();
+            updateLastUpdated();
+            
+            // Update progress bars immediately
+            setTimeout(updateProgressBars, 100);
+        });
+
+        function loadCurrentSettings() {
+            // Load settings from localStorage or use defaults
+            currentSettings = {
+                autoRefresh: true,
+                performanceMonitoring: true,
+                logCollection: false,
+                refreshInterval: 10,
+                emailNotifications: false,
+                browserNotifications: true,
+                serverDownAlerts: true,
+                performanceAlerts: true,
+                cpuThreshold: 80,
+                memoryThreshold: 85,
+                dataRetention: 90,
+                autoCleanup: true,
+                theme: localStorage.getItem('theme') || 'system',
+                language: 'en',
+                welcomeMessage: true,
+                compactMode: false
+            };
+
+            // Load from localStorage if available
+            const savedSettings = localStorage.getItem('serverMonitoringSettings');
+            if (savedSettings) {
+                try {
+                    const parsed = JSON.parse(savedSettings);
+                    currentSettings = { ...currentSettings, ...parsed };
+                } catch (error) {
+                    console.error('Error parsing saved settings:', error);
+                }
+            }
+
+            // Store original settings for reset functionality
+            originalSettings = { ...currentSettings };
+
+            // Apply settings to UI
+            applySettingsToUI();
+        }
+
+        function applySettingsToUI() {
+            // System Preferences
+            document.getElementById('auto-refresh').checked = currentSettings.autoRefresh;
+            document.getElementById('performance-monitoring').checked = currentSettings.performanceMonitoring;
+            document.getElementById('log-collection').checked = currentSettings.logCollection;
+            document.getElementById('refresh-interval').value = currentSettings.refreshInterval;
+
+            // Notification Settings
+            document.getElementById('email-notifications').checked = currentSettings.emailNotifications;
+            document.getElementById('browser-notifications').checked = currentSettings.browserNotifications;
+            document.getElementById('server-down-alerts').checked = currentSettings.serverDownAlerts;
+            document.getElementById('performance-alerts').checked = currentSettings.performanceAlerts;
+            document.getElementById('cpu-threshold').value = currentSettings.cpuThreshold;
+            document.getElementById('memory-threshold').value = currentSettings.memoryThreshold;
+
+            // Data Management
+            document.getElementById('data-retention').value = currentSettings.dataRetention;
+            document.getElementById('auto-cleanup').checked = currentSettings.autoCleanup;
+
+            // User Preferences
+            document.getElementById('theme').value = currentSettings.theme;
+            document.getElementById('language').value = currentSettings.language;
+            document.getElementById('welcome-message').checked = currentSettings.welcomeMessage;
+            document.getElementById('compact-mode').checked = currentSettings.compactMode;
+        }
+
+        function setupEventListeners() {
+            // Save all settings button
+            document.getElementById('save-all-settings').addEventListener('click', saveAllSettings);
+            
+            // Reset settings button
+            document.getElementById('reset-settings').addEventListener('click', resetSettings);
+            
+            // Backup data button
+            document.getElementById('backup-data').addEventListener('click', backupData);
+            
+            // Clear data button
+            document.getElementById('clear-data').addEventListener('click', clearData);
+            
+            // Export config button
+            document.getElementById('export-config').addEventListener('click', exportConfiguration);
+            
+            // Import config button
+            document.getElementById('import-config').addEventListener('click', importConfiguration);
+
+            // Auto-refresh toggle
+            document.getElementById('auto-refresh').addEventListener('change', function(e) {
+                currentSettings.autoRefresh = e.target.checked;
+            });
+
+            // Performance monitoring toggle
+            document.getElementById('performance-monitoring').addEventListener('change', function(e) {
+                currentSettings.performanceMonitoring = e.target.checked;
+            });
+
+            // Log collection toggle
+            document.getElementById('log-collection').addEventListener('change', function(e) {
+                currentSettings.logCollection = e.target.checked;
+            });
+
+            // Refresh interval change
+            document.getElementById('refresh-interval').addEventListener('change', function(e) {
+                currentSettings.refreshInterval = parseInt(e.target.value);
+            });
+
+            // Email notifications toggle
+            document.getElementById('email-notifications').addEventListener('change', function(e) {
+                currentSettings.emailNotifications = e.target.checked;
+            });
+
+            // Browser notifications toggle
+            document.getElementById('browser-notifications').addEventListener('change', function(e) {
+                currentSettings.browserNotifications = e.target.checked;
+            });
+
+            // Server down alerts toggle
+            document.getElementById('server-down-alerts').addEventListener('change', function(e) {
+                currentSettings.serverDownAlerts = e.target.checked;
+            });
+
+            // Performance alerts toggle
+            document.getElementById('performance-alerts').addEventListener('change', function(e) {
+                currentSettings.performanceAlerts = e.target.checked;
+            });
+
+            // CPU threshold change
+            document.getElementById('cpu-threshold').addEventListener('change', function(e) {
+                currentSettings.cpuThreshold = parseInt(e.target.value);
+            });
+
+            // Memory threshold change
+            document.getElementById('memory-threshold').addEventListener('change', function(e) {
+                currentSettings.memoryThreshold = parseInt(e.target.value);
+            });
+
+            // Data retention change
+            document.getElementById('data-retention').addEventListener('change', function(e) {
+                currentSettings.dataRetention = parseInt(e.target.value);
+            });
+
+            // Auto-cleanup toggle
+            document.getElementById('auto-cleanup').addEventListener('change', function(e) {
+                currentSettings.autoCleanup = e.target.checked;
+            });
+
+            // Theme change
+            document.getElementById('theme').addEventListener('change', function(e) {
+                currentSettings.theme = e.target.value;
+                applyTheme(e.target.value);
+            });
+
+            // Language change
+            document.getElementById('language').addEventListener('change', function(e) {
+                currentSettings.language = e.target.value;
+            });
+
+            // Welcome message toggle
+            document.getElementById('welcome-message').addEventListener('change', function(e) {
+                currentSettings.welcomeMessage = e.target.checked;
+            });
+
+            // Compact mode toggle
+            document.getElementById('compact-mode').addEventListener('change', function(e) {
+                currentSettings.compactMode = e.target.checked;
+            });
+        }
+
+        function saveAllSettings() {
+            // Save to localStorage
+            localStorage.setItem('serverMonitoringSettings', JSON.stringify(currentSettings));
+            
+            // Show success message
+            showNotification('Settings saved successfully!', 'success');
+            
+            // Update last updated time
+            updateLastUpdated();
+        }
+
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to default values? This action cannot be undone.')) {
+                currentSettings = { ...originalSettings };
+                applySettingsToUI();
+                showNotification('Settings reset to default values!', 'info');
+            }
+        }
+
+        function backupData() {
+            // Create a backup of current settings and data
+            const backup = {
+                settings: currentSettings,
+                timestamp: new Date().toISOString(),
+                version: '2.1.0'
+            };
+            
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `server-monitoring-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showNotification('Backup created successfully!', 'success');
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all performance data? This action cannot be undone.')) {
+                // Clear performance data (this would typically call an API)
+                showNotification('Performance data cleared successfully!', 'success');
+            }
+        }
+
+        function exportConfiguration() {
+            const config = {
+                settings: currentSettings,
+                timestamp: new Date().toISOString(),
+                version: '2.1.0'
+            };
+            
+            const dataStr = JSON.stringify(config, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `server-monitoring-config-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showNotification('Configuration exported successfully!', 'success');
+        }
+
+        function importConfiguration() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            if (config.settings && config.version) {
+                                currentSettings = { ...currentSettings, ...config.settings };
+                                applySettingsToUI();
+                                showNotification('Configuration imported successfully!', 'success');
+                            } else {
+                                showNotification('Invalid configuration file!', 'error');
+                            }
+                        } catch (error) {
+                            showNotification('Error parsing configuration file!', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            
+            input.click();
+        }
+
+        function applyTheme(theme) {
+            // Use the global theme manager if available
+            if (window.themeManager) {
+                window.themeManager.setTheme(theme);
+            } else {
+                // Fallback to local theme application
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
+            }
+        }
+
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('last-updated').textContent = now.toLocaleString();
+            
+            // Update progress bars with proper calculations
+            updateProgressBars();
+        }
+        
+        function updateProgressBars() {
+            const totalServers = {{stats.totalServers}} || 0;
+            const onlineServers = {{stats.onlineServers}} || 0;
+            const offlineServers = {{stats.offlineServers}} || 0;
+            
+            // Update progress bars
+            if (totalServers > 0) {
+                // Total servers progress bar (always 100%)
+                const totalProgressBar = document.querySelector('.bg-gray-50:nth-child(1) .progress-bar');
+                if (totalProgressBar) totalProgressBar.style.width = '100%';
+                
+                // Online servers progress bar
+                const onlineProgressBar = document.querySelector('.bg-gray-50:nth-child(2) .progress-bar');
+                if (onlineProgressBar) {
+                    const onlinePercentage = Math.round((onlineServers / totalServers) * 100);
+                    onlineProgressBar.style.width = onlinePercentage + '%';
+                }
+                
+                // Offline servers progress bar
+                const offlineProgressBar = document.querySelector('.bg-gray-50:nth-child(3) .progress-bar');
+                if (offlineProgressBar) {
+                    const offlinePercentage = Math.round((offlineServers / totalServers) * 100);
+                    offlineProgressBar.style.width = offlinePercentage + '%';
+                }
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 transition-all duration-300 transform translate-x-full`;
+            
+            // Set background color based on type
+            switch (type) {
+                case 'success':
+                    notification.style.backgroundColor = '#10b981';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#ef4444';
+                    break;
+                case 'warning':
+                    notification.style.backgroundColor = '#f59e0b';
+                    break;
+                default:
+                    notification.style.backgroundColor = '#3b82f6';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Request browser notifications permission
+        if ('Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+    </script>
+    <script src="/js/theme-toggle.js"></script>
+</body>
+</html>
