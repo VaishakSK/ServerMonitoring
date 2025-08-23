@@ -68,11 +68,12 @@ npm test
 
 ## 🚀 Usage  
 
-1. Start the server.  
-2. Open your browser: http://localhost:$PORT 
-3. Login/Register with credentials.  
-4. Add servers with the **security code**.  
-5. Monitor server metrics in real time.  
+1. Install Windows Exporter in the server/PC to be monitored.
+2. Start the server.  
+3. Open your browser: http://localhost:$PORT 
+4. Login/Register with credentials.  
+5. Add servers with the **security code**.  
+6. Monitor server metrics in real time.  
 
 ---
 
